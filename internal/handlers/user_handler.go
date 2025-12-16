@@ -65,3 +65,37 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, resp)
 }
+
+// UpdateUser handles updating user information
+func (h *UserHandler) UpdateUser(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	var req dtos.UpdateUserRequest
+
+	// Validate request body
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	// Update user
+	user, err := h.userService.UpdateUser(userID.(int64), &req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to update user"})
+		return
+	}
+
+	// Return update response
+	resp := dtos.UpdateUserResponse{}
+	resp.User.ID = user.ID
+	resp.User.Username = user.Username
+	resp.User.Email = user.Email
+	resp.User.Image = req.User.Image
+	resp.User.Bio = req.User.Bio
+
+	c.JSON(http.StatusOK, resp)
+}

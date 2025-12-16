@@ -39,3 +39,11 @@ func (r *UserRepository) FindUserByID(id int64) (*models.User, error) {
 	}
 	return user, nil
 }
+
+// UpdateUser updates a user in the database
+func (r *UserRepository) UpdateUser(user *models.User) error {
+	if err := r.db.Save(user).Error; err != nil {
+		return err
+	}
+	return nil
+}

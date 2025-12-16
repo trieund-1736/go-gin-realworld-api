@@ -22,8 +22,13 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 			users.POST("/login", appContainer.AuthHandler.Login)  // Login
 		}
 
-		// Get current user (requires auth middleware)
-		api.GET("/user", middleware.JWTAuthMiddleware(), appContainer.UserHandler.GetCurrentUser)
+		// Current user routes (requires auth middleware)
+		user := api.Group("/user")
+		user.Use(middleware.JWTAuthMiddleware())
+		{
+			user.GET("", appContainer.UserHandler.GetCurrentUser) // Get current user
+			user.PUT("", appContainer.UserHandler.UpdateUser)     // Update current user
+		}
 		// Article routes (TODO: implement)
 		articles := api.Group("/articles")
 		{

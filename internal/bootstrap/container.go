@@ -16,9 +16,10 @@ type AppContainer struct {
 func NewAppContainer() *AppContainer {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(config.DB)
+	profileRepo := repository.NewProfileRepository(config.DB)
 
 	// Initialize services
-	userService := services.NewUserService(userRepo)
+	userService := services.NewUserService(userRepo, profileRepo)
 	authService := services.NewAuthService(userRepo)
 
 	// Initialize handlers

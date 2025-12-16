@@ -90,15 +90,7 @@ paths:
                         type: string
                         example: john@example.com
         "400":
-          description: Invalid request body or validation error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: invalid request body
+          $ref: "#/components/responses/BadRequest"
 
   /api/users/login:
     post:
@@ -155,25 +147,9 @@ paths:
                         type: string
                         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         "400":
-          description: Invalid request body
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: invalid request body
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: invalid credentials
+          $ref: "#/components/responses/InvalidCredentials"
 
   /api/user:
     get:
@@ -206,27 +182,120 @@ paths:
                         type: string
                         example: john@example.com
         "401":
-          description: Unauthorized - missing or invalid token
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: missing authorization header
+          $ref: "#/components/responses/Unauthorized"
         "404":
-          description: User not found
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Update current authenticated user
+      description: Update the information of the currently authenticated user (email, username, password, image, bio)
+      operationId: updateCurrentUser
+      tags:
+        - User
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: newemail@example.com
+                    username:
+                      type: string
+                      example: new_username
+                    password:
+                      type: string
+                      format: password
+                      example: newpassword123
+                    image:
+                      type: string
+                      example: https://example.com/avatar.jpg
+                    bio:
+                      type: string
+                      example: This is my bio
+      responses:
+        "200":
+          description: User information updated successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: user not found
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                      username:
+                        type: string
+                        example: new_username
+                      email:
+                        type: string
+                        example: newemail@example.com
+                      image:
+                        type: string
+                        example: https://example.com/avatar.jpg
+                      bio:
+                        type: string
+                        example: This is my bio
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
 components:
+  responses:
+    BadRequest:
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: invalid request body
+    Unauthorized:
+      description: Unauthorized - missing or invalid token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: missing authorization header
+    NotFound:
+      description: User not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: user not found
+    InvalidCredentials:
+      description: Invalid credentials
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: invalid credentials
   securitySchemes:
     BearerAuth:
       type: http
