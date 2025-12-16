@@ -1,8 +1,10 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-gin-realworld-api/internal/handlers"
+	"go-gin-realworld-api/internal/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes(router *gin.Engine) {
@@ -20,8 +22,7 @@ func SetupRoutes(router *gin.Engine) {
 		}
 
 		// Get current user (TODO: implement with auth middleware)
-		api.GET("/user", getCurrentUser)
-
+		api.GET("/user", middleware.JWTAuthMiddleware(), getCurrentUser)
 		// Article routes (TODO: implement)
 		articles := api.Group("/articles")
 		{
@@ -49,9 +50,14 @@ func SetupRoutes(router *gin.Engine) {
 
 // Handler stubs (TODO: implement)
 
-func registerUser(c *gin.Context)      { c.JSON(501, gin.H{"error": "not implemented"}) }
-func loginUser(c *gin.Context)         { c.JSON(501, gin.H{"error": "not implemented"}) }
-func getCurrentUser(c *gin.Context)    { c.JSON(501, gin.H{"error": "not implemented"}) }
+func registerUser(c *gin.Context) { c.JSON(501, gin.H{"error": "not implemented"}) }
+func loginUser(c *gin.Context)    { c.JSON(501, gin.H{"error": "not implemented"}) }
+func getCurrentUser(c *gin.Context) {
+	// Demo: Access JWT claims from context
+	userID, _ := c.Get("user_id")
+	email, _ := c.Get("email")
+	c.JSON(200, gin.H{"user_id": userID, "email": email})
+}
 func listArticles(c *gin.Context)      { c.JSON(501, gin.H{"error": "not implemented"}) }
 func feedArticles(c *gin.Context)      { c.JSON(501, gin.H{"error": "not implemented"}) }
 func getArticle(c *gin.Context)        { c.JSON(501, gin.H{"error": "not implemented"}) }
