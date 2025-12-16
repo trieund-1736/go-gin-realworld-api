@@ -21,14 +21,51 @@ Theo spec RealWorld:
 ### Đăng Nhập (Login)
 
 - **POST** `/api/users/login`
-- **Body:** `email`, `password`
+- **Body:** `{ "user": { "email", "password" } }`
 - Nếu đăng nhập thành công, trả về User + JWT token (token dùng để gọi các endpoint khác)
 
 ### Lấy Thông Tin Người Dùng Hiện Tại
 
 - **GET** `/api/user`
+- Yêu cầu header: `Authorization: Token <jwt>`
+- Trả về đối tượng User tương ứng với token
 
-## 3. Articles (Bài Viết)
+### Cập Nhật Thông Tin Người Dùng
+
+- **PUT** `/api/user`
+- **Body JSON:** `{ "user": { "email", "username", "password", "image", "bio" } }` (tất cả optional)
+- Các trường cho phép update: `email`, `username`, `password`, `image`, `bio`
+- Cần xác thực (token) mới update được
+- Trả về User được cập nhật
+
+## 3. Profiles (Hồ sơ Người Dùng)
+
+### Lấy Profile Người Dùng
+
+- **GET** `/api/profiles/:username`
+- Không bắt buộc xác thực (authentication optional)
+- Trả về profile người dùng: `username`, `bio`, `image`, `following`
+
+### Follow Người Dùng
+
+- **POST** `/api/profiles/:username/follow`
+- Yêu cầu xác thực (authentication required)
+- Trả về profile của người dùng được follow (cập nhật trạng thái `following`)
+
+### Unfollow Người Dùng
+
+- **DELETE** `/api/profiles/:username/follow`
+- Yêu cầu xác thực (authentication required)
+- Trả về profile của người dùng được unfollow (cập nhật trạng thái `following`)
+
+## 4. Articles (Bài Viết)
+
+### Danh Sách Bài Viết
+
+- **GET** `/api/articles`
+- Hỗ trợ query params: `tag`, `author`, `favorited`, `limit`, `offset`
+- Trả về list bài viết, sắp xếp theo thời gian (mới nhất trước)
+- Authentication optional
 
 ### Feed Bài Viết
 
@@ -63,7 +100,7 @@ Theo spec RealWorld:
 - Cần xác thực
 - Xoá bài viết
 
-## 4. Comments (Bình Luận)
+## 5. Comments (Bình Luận)
 
 ### Thêm Bình Luận Vào Bài Viết
 
@@ -84,7 +121,7 @@ Theo spec RealWorld:
 - Cần xác thực
 - Xoá comment theo id
 
-## 5. Favorites (Yêu Thích / Thích Bài Viết)
+## 6. Favorites (Yêu Thích / Thích Bài Viết)
 
 ### Thích Bài Viết
 
@@ -98,7 +135,7 @@ Theo spec RealWorld:
 - Cần xác thực
 - Trả về bài viết (cập nhật lại)
 
-## 6. Tags
+## 7. Tags
 
 ### Lấy Danh Sách Tags
 
@@ -106,7 +143,9 @@ Theo spec RealWorld:
 - Không cần xác thực
 - Trả về danh sách tag (mảng string)
 
-## 7. Yêu Cầu Kỹ Thuật & Bổ Sung
+---
+
+## Yêu Cầu Kỹ Thuật & Bổ Sung
 
 - **JWT:** Sử dụng JWT để tạo token khi đăng nhập, và middleware Gin để validate token trong các endpoint cần authentication
 - **Validation:** Validate dữ liệu request (ví dụ: email, password, title, body) — nếu data thiếu hoặc sai định dạng, trả lỗi phù hợp (HTTP status code + message)
