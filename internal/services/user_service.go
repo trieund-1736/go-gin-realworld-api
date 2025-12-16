@@ -1,8 +1,6 @@
 package services
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
 	"time"
@@ -37,8 +35,7 @@ func (s *UserService) RegisterUser(username, email, password string) (*models.Us
 	return user, nil
 }
 
-// hashPassword hashes the password using SHA256
-func hashPassword(password string) string {
-	hash := sha256.Sum256([]byte(password))
-	return fmt.Sprintf("%x", hash)
+// GetUserByID gets user by ID
+func (s *UserService) GetUserByID(id int64) (*models.User, error) {
+	return s.userRepo.FindUserByID(id)
 }

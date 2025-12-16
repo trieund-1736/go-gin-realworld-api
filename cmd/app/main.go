@@ -27,15 +27,17 @@ func main() {
 
 	// Initialize services
 	userService := services.NewUserService(userRepo)
+	authService := services.NewAuthService(userRepo)
 
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)
+	authHandler := handlers.NewAuthHandler(authService)
 
 	// Create Gin router
 	router := gin.Default()
 
 	// Setup routes
-	routes.SetupRoutes(router, userHandler)
+	routes.SetupRoutes(router, userHandler, authHandler)
 
 	// Start server
 	addr := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)

@@ -7,22 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(router *gin.Engine, userHandler *handlers.UserHandler) {
+func SetupRoutes(router *gin.Engine, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler) {
 	// Health check endpoint
 	router.GET("/health", handlers.HealthCheck)
 
 	// API v1 routes
 	api := router.Group("/api")
 	{
-		// User routes (TODO: implement)
+		// User routes
 		users := api.Group("/users")
 		{
 			users.POST("", userHandler.RegisterUser) // Register
-			users.POST("/login", loginUser)          // Login
+			users.POST("/login", authHandler.Login)  // Login
 		}
 
-		// Get current user (TODO: implement with auth middleware)
-		api.GET("/user", middleware.JWTAuthMiddleware(), getCurrentUser)
+		// Get current user (requires auth middleware)
+		api.GET("/user", middleware.JWTAuthMiddleware(), userHandler.GetCurrentUser)
 		// Article routes (TODO: implement)
 		articles := api.Group("/articles")
 		{
@@ -49,14 +49,6 @@ func SetupRoutes(router *gin.Engine, userHandler *handlers.UserHandler) {
 }
 
 // Handler stubs (TODO: implement)
-
-func loginUser(c *gin.Context) { c.JSON(501, gin.H{"error": "not implemented"}) }
-func getCurrentUser(c *gin.Context) {
-	// Demo: Access JWT claims from context
-	userID, _ := c.Get("user_id")
-	email, _ := c.Get("email")
-	c.JSON(200, gin.H{"user_id": userID, "email": email})
-}
 func listArticles(c *gin.Context)      { c.JSON(501, gin.H{"error": "not implemented"}) }
 func feedArticles(c *gin.Context)      { c.JSON(501, gin.H{"error": "not implemented"}) }
 func getArticle(c *gin.Context)        { c.JSON(501, gin.H{"error": "not implemented"}) }

@@ -1,0 +1,222 @@
+openapi: 3.0.0
+info:
+  title: RealWorld API - Go Gin
+  description: A Realworld API implementation using Go and Gin Framework
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /api/users:
+    post:
+      summary: Register a new user
+      description: Create a new user account with username, email, and password
+      operationId: registerUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  type: object
+                  required:
+                    - username
+                    - email
+                    - password
+                  properties:
+                    username:
+                      type: string
+                      example: john_doe
+                      minLength: 1
+                    email:
+                      type: string
+                      format: email
+                      example: john@example.com
+                    password:
+                      type: string
+                      format: password
+                      example: password123
+                      minLength: 1
+      responses:
+        "201":
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                      username:
+                        type: string
+                        example: john_doe
+                      email:
+                        type: string
+                        example: john@example.com
+        "400":
+          description: Invalid request body or validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid request body
+
+  /api/users/login:
+    post:
+      summary: User login
+      description: Login with email and password to get JWT token
+      operationId: loginUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  type: object
+                  required:
+                    - email
+                    - password
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: john@example.com
+                    password:
+                      type: string
+                      format: password
+                      example: password123
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                      username:
+                        type: string
+                        example: john_doe
+                      email:
+                        type: string
+                        example: john@example.com
+                      token:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid request body
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid credentials
+
+  /api/user:
+    get:
+      summary: Get current authenticated user
+      description: Retrieve the information of the currently authenticated user
+      operationId: getCurrentUser
+      tags:
+        - User
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                      username:
+                        type: string
+                        example: john_doe
+                      email:
+                        type: string
+                        example: john@example.com
+        "401":
+          description: Unauthorized - missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: missing authorization header
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: user not found
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+
+tags:
+  - name: Authentication
+    description: User authentication endpoints (Register, Login)
+  - name: User
+    description: User information endpoints
