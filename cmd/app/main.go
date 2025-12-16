@@ -14,6 +14,11 @@ func main() {
 	// Load config
 	cfg := config.LoadConfig()
 
+	// Initialize database
+	if err := config.InitDB(); err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+
 	// Create Gin router
 	router := gin.Default()
 

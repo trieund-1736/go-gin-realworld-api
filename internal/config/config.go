@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"sync"
 
 	"github.com/joho/godotenv"
 )
@@ -30,27 +31,36 @@ type JWTConfig struct {
 	Secret string
 }
 
-func LoadConfig() *Config {
-	// Load .env file
-	godotenv.Load()
+var (
+	cfg  *Config
+	once sync.Once
+)
 
-	return &Config{
-		Server: ServerConfig{
-			Host: getEnv("SERVER_HOST", "localhost"),
-			Port: getEnv("SERVER_PORT", "8080"),
-		},
-		Database: DatabaseConfig{
-			Driver:   getEnv("DB_DRIVER", "mysql"),
-			Host:     getEnv("DB_HOST", "localhost"),
-			Port:     getEnv("DB_PORT", "3306"),
-			User:     getEnv("DB_USER", "root"),
-			Password: getEnv("DB_PASSWORD", "password"),
-			Database: getEnv("DB_NAME", "realworld_api"),
-		},
-		JWT: JWTConfig{
-			Secret: getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
-		},
-	}
+// LoadConfig loads config once and returns the singleton instance
+func LoadConfig() *Config {
+	once.Do(func() {
+		// Load .env file
+		godotenv.Load()
+
+		cfg = &Config{
+			Server: ServerConfig{
+				Host: getEnv("SERVER_HOST", "localhost"),
+				Port: getEnv("SERVER_PORT", "8080"),
+			},
+			Database: DatabaseConfig{
+				Driver:   getEnv("DB_DRIVER", "mysql"),
+				Host:     getEnv("DB_HOST", "localhost"),
+				Port:     getEnv("DB_PORT", "3306"),
+				User:     getEnv("DB_USER", "root"),
+				Password: getEnv("DB_PASSWORD", "password"),
+				Database: getEnv("DB_NAME", "realworld_api"),
+			},
+			JWT: JWTConfig{
+				Secret: getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
+			},
+		}
+	})
+	return cfg
 }
 
 func getEnv(key, defaultValue string) string {
