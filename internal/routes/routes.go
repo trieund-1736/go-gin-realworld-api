@@ -2,18 +2,15 @@ package routes
 
 import (
 	"go-gin-realworld-api/internal/bootstrap"
+	"go-gin-realworld-api/internal/handlers"
 	"go-gin-realworld-api/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-func HealthCheck(c *gin.Context) {
-	c.JSON(200, gin.H{"status": "ok"})
-}
-
 func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 	// Health check endpoint
-	router.GET("/health", HealthCheck)
+	router.GET("/health", handlers.HealthCheck)
 
 	// API v1 routes
 	api := router.Group("/api")

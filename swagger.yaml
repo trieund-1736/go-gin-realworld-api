@@ -13,6 +13,25 @@ servers:
     description: Production server
 
 paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the API server is running and healthy
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
   /api/users:
     post:
       summary: Register a new user
@@ -216,6 +235,8 @@ components:
       description: JWT token obtained from login endpoint
 
 tags:
+  - name: Health
+    description: Health check endpoint
   - name: Authentication
     description: User authentication endpoints (Register, Login)
   - name: User
