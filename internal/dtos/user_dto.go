@@ -35,3 +35,14 @@ type UpdateUserResponse struct {
 		Bio      string `json:"bio,omitempty"`
 	} `json:"user"`
 }
+
+type ProfileUserResponse struct {
+	Username  string `json:"username"`
+	Bio       string `json:"bio"`
+	Image     string `json:"image"`
+	Following bool   `json:"following"`
+}
+
+type ProfileResponse struct {
+	Profile ProfileUserResponse `json:"profile"`
+}

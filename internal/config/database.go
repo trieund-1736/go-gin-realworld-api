@@ -49,6 +49,7 @@ func MigrateDB() error {
 	if err := DB.AutoMigrate(
 		&models.User{},
 		&models.Profile{},
+		&models.Follow{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 		return err

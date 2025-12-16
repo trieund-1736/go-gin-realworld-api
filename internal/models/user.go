@@ -9,4 +9,5 @@ type User struct {
 	Password  string    `gorm:"column:password;type:varchar(255);not null" json:"-"`
 	CreatedAt time.Time `gorm:"column:created_at;type:timestamp;autoCreateTime;not null" json:"created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at;type:timestamp;autoUpdateTime;not null" json:"updated_at"`
+	Profile   *Profile  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 }

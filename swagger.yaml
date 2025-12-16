@@ -254,6 +254,135 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/profiles/{username}:
+    get:
+      summary: Get user profile
+      description: Retrieve user profile by username. Authentication is optional.
+      operationId: getProfile
+      tags:
+        - Profiles
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Username of the user
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profile:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: john_doe
+                      bio:
+                        type: string
+                        example: Software developer
+                      image:
+                        type: string
+                        example: https://example.com/avatar.jpg
+                      following:
+                        type: boolean
+                        example: false
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/profiles/{username}/follow:
+    post:
+      summary: Follow a user
+      description: Follow a user by username. Authentication required.
+      operationId: followUser
+      tags:
+        - Profiles
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Username of the user to follow
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: User followed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profile:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: john_doe
+                      bio:
+                        type: string
+                        example: Software developer
+                      image:
+                        type: string
+                        example: https://example.com/avatar.jpg
+                      following:
+                        type: boolean
+                        example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      summary: Unfollow a user
+      description: Unfollow a user by username. Authentication required.
+      operationId: unfollowUser
+      tags:
+        - Profiles
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Username of the user to unfollow
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: User unfollowed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profile:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: john_doe
+                      bio:
+                        type: string
+                        example: Software developer
+                      image:
+                        type: string
+                        example: https://example.com/avatar.jpg
+                      following:
+                        type: boolean
+                        example: false
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 components:
   responses:
     BadRequest:
@@ -310,3 +439,5 @@ tags:
     description: User authentication endpoints (Register, Login)
   - name: User
     description: User information endpoints
+  - name: Profiles
+    description: User profile endpoints (Get profile, Follow, Unfollow)

@@ -9,25 +9,29 @@ import (
 
 type AppContainer struct {
 	// Handlers
-	UserHandler *handlers.UserHandler
-	AuthHandler *handlers.AuthHandler
+	UserHandler    *handlers.UserHandler
+	AuthHandler    *handlers.AuthHandler
+	ProfileHandler *handlers.ProfileHandler
 }
 
 func NewAppContainer() *AppContainer {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(config.DB)
 	profileRepo := repository.NewProfileRepository(config.DB)
+	followRepo := repository.NewFollowRepository(config.DB)
 
 	// Initialize services
-	userService := services.NewUserService(userRepo, profileRepo)
+	userService := services.NewUserService(userRepo, profileRepo, followRepo)
 	authService := services.NewAuthService(userRepo)
 
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthHandler(authService)
+	profileHandler := handlers.NewProfileHandler(userService)
 
 	return &AppContainer{
-		UserHandler: userHandler,
-		AuthHandler: authHandler,
+		UserHandler:    userHandler,
+		AuthHandler:    authHandler,
+		ProfileHandler: profileHandler,
 	}
 }

@@ -40,6 +40,22 @@ func (r *UserRepository) FindUserByID(id int64) (*models.User, error) {
 	return user, nil
 }
 
+// FindUserByUsername finds a user by username with optional profile preload
+func (r *UserRepository) FindUserByUsername(username string, withProfile ...bool) (*models.User, error) {
+	var user *models.User
+	query := r.db
+
+	// Check if preload profile flag is set (default: false)
+	if len(withProfile) > 0 && withProfile[0] {
+		query = query.Preload("Profile")
+	}
+
+	if err := query.Where("username = ?", username).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // UpdateUser updates a user in the database
 func (r *UserRepository) UpdateUser(user *models.User) error {
 	if err := r.db.Save(user).Error; err != nil {
