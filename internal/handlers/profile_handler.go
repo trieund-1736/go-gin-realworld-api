@@ -8,11 +8,13 @@ import (
 )
 
 type ProfileHandler struct {
-	userService *services.UserService
+	profileService *services.ProfileService
 }
 
-func NewProfileHandler(userService *services.UserService) *ProfileHandler {
-	return &ProfileHandler{userService: userService}
+func NewProfileHandler(profileService *services.ProfileService) *ProfileHandler {
+	return &ProfileHandler{
+		profileService: profileService,
+	}
 }
 
 // GetProfile handles getting a user profile
@@ -26,7 +28,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 	}
 
 	// Get profile
-	profile, err := h.userService.GetProfileByUsername(username, currentUserID)
+	profile, err := h.profileService.GetProfileByUsername(username, currentUserID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "profile not found"})
 		return
@@ -46,7 +48,7 @@ func (h *ProfileHandler) FollowUser(c *gin.Context) {
 	username := c.Param("username")
 
 	// Follow user
-	profile, err := h.userService.FollowUser(userID.(int64), username)
+	profile, err := h.profileService.FollowUser(userID.(int64), username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
@@ -66,7 +68,7 @@ func (h *ProfileHandler) UnfollowUser(c *gin.Context) {
 	username := c.Param("username")
 
 	// Unfollow user
-	profile, err := h.userService.UnfollowUser(userID.(int64), username)
+	profile, err := h.profileService.UnfollowUser(userID.(int64), username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return

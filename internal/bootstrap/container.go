@@ -21,13 +21,14 @@ func NewAppContainer() *AppContainer {
 	followRepo := repository.NewFollowRepository(config.DB)
 
 	// Initialize services
-	userService := services.NewUserService(userRepo, profileRepo, followRepo)
 	authService := services.NewAuthService(userRepo)
+	userService := services.NewUserService(userRepo, profileRepo, followRepo)
+	profileService := services.NewProfileService(userRepo, profileRepo, followRepo)
 
 	// Initialize handlers
-	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthHandler(authService)
-	profileHandler := handlers.NewProfileHandler(userService)
+	userHandler := handlers.NewUserHandler(userService)
+	profileHandler := handlers.NewProfileHandler(profileService)
 
 	return &AppContainer{
 		UserHandler:    userHandler,
