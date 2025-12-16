@@ -32,9 +32,9 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 		// Profile routes
 		profiles := api.Group("/profiles")
 		{
-			profiles.GET("/:username", appContainer.ProfileHandler.GetProfile)                                             // Get profile (optional auth)
-			profiles.POST("/:username/follow", middleware.JWTAuthMiddleware(), appContainer.ProfileHandler.FollowUser)     // Follow user
-			profiles.DELETE("/:username/follow", middleware.JWTAuthMiddleware(), appContainer.ProfileHandler.UnfollowUser) // Unfollow user
+			profiles.GET("/:username", middleware.JWTOptionalAuthMiddleware(), appContainer.ProfileHandler.GetProfile)     // Get profile (optional auth)
+			profiles.POST("/:username/follow", middleware.JWTAuthMiddleware(), appContainer.ProfileHandler.FollowUser)     // Follow user (required auth)
+			profiles.DELETE("/:username/follow", middleware.JWTAuthMiddleware(), appContainer.ProfileHandler.UnfollowUser) // Unfollow user (required auth)
 		} // Article routes (TODO: implement)
 		articles := api.Group("/articles")
 		{
