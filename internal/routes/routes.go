@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(router *gin.Engine) {
+func SetupRoutes(router *gin.Engine, userHandler *handlers.UserHandler) {
 	// Health check endpoint
 	router.GET("/health", handlers.HealthCheck)
 
@@ -17,8 +17,8 @@ func SetupRoutes(router *gin.Engine) {
 		// User routes (TODO: implement)
 		users := api.Group("/users")
 		{
-			users.POST("", registerUser)    // Register
-			users.POST("/login", loginUser) // Login
+			users.POST("", userHandler.RegisterUser) // Register
+			users.POST("/login", loginUser)          // Login
 		}
 
 		// Get current user (TODO: implement with auth middleware)
@@ -50,8 +50,7 @@ func SetupRoutes(router *gin.Engine) {
 
 // Handler stubs (TODO: implement)
 
-func registerUser(c *gin.Context) { c.JSON(501, gin.H{"error": "not implemented"}) }
-func loginUser(c *gin.Context)    { c.JSON(501, gin.H{"error": "not implemented"}) }
+func loginUser(c *gin.Context) { c.JSON(501, gin.H{"error": "not implemented"}) }
 func getCurrentUser(c *gin.Context) {
 	// Demo: Access JWT claims from context
 	userID, _ := c.Get("user_id")
