@@ -1,15 +1,19 @@
 package routes
 
 import (
-	"go-gin-realworld-api/internal/handlers"
+	"go-gin-realworld-api/internal/bootstrap"
 	"go-gin-realworld-api/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(router *gin.Engine, userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler) {
+func HealthCheck(c *gin.Context) {
+	c.JSON(200, gin.H{"status": "ok"})
+}
+
+func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 	// Health check endpoint
-	router.GET("/health", handlers.HealthCheck)
+	router.GET("/health", HealthCheck)
 
 	// API v1 routes
 	api := router.Group("/api")
@@ -17,12 +21,12 @@ func SetupRoutes(router *gin.Engine, userHandler *handlers.UserHandler, authHand
 		// User routes
 		users := api.Group("/users")
 		{
-			users.POST("", userHandler.RegisterUser) // Register
-			users.POST("/login", authHandler.Login)  // Login
+			users.POST("", appContainer.UserHandler.RegisterUser) // Register
+			users.POST("/login", appContainer.AuthHandler.Login)  // Login
 		}
 
 		// Get current user (requires auth middleware)
-		api.GET("/user", middleware.JWTAuthMiddleware(), userHandler.GetCurrentUser)
+		api.GET("/user", middleware.JWTAuthMiddleware(), appContainer.UserHandler.GetCurrentUser)
 		// Article routes (TODO: implement)
 		articles := api.Group("/articles")
 		{
