@@ -32,7 +32,7 @@ func (h *FavoriteHandler) FavoriteArticle(c *gin.Context) {
 	currentUserID := userID.(int64)
 
 	// Call service to favorite article
-	result, err := h.favoriteService.FavoriteArticle(slug, currentUserID)
+	result, err := h.favoriteService.FavoriteArticle(c.Request.Context(), slug, currentUserID)
 	if err != nil {
 		if err.Error() == "article not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
@@ -60,7 +60,7 @@ func (h *FavoriteHandler) UnfavoriteArticle(c *gin.Context) {
 	currentUserID := userID.(int64)
 
 	// Call service to unfavorite article
-	result, err := h.favoriteService.UnfavoriteArticle(slug, currentUserID)
+	result, err := h.favoriteService.UnfavoriteArticle(c.Request.Context(), slug, currentUserID)
 	if err != nil {
 		if err.Error() == "article not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})

@@ -7,17 +7,16 @@ import (
 )
 
 type TagRepository struct {
-	db *gorm.DB
 }
 
-func NewTagRepository(db *gorm.DB) *TagRepository {
-	return &TagRepository{db: db}
+func NewTagRepository() *TagRepository {
+	return &TagRepository{}
 }
 
 // GetAllTags retrieves all unique tags from the database
-func (r *TagRepository) GetAllTags() ([]string, error) {
+func (r *TagRepository) GetAllTags(db *gorm.DB) ([]string, error) {
 	var tags []string
-	if err := r.db.
+	if err := db.
 		Model(&models.Tag{}).
 		Distinct().
 		Pluck("name", &tags).Error; err != nil {

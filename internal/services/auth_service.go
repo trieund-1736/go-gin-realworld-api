@@ -1,26 +1,32 @@
 package services
 
 import (
+	"context"
 	"crypto/sha256"
 	"errors"
 	"fmt"
+
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
 	"go-gin-realworld-api/internal/utils"
+
+	"gorm.io/gorm"
 )
 
 type AuthService struct {
+	db       *gorm.DB
 	userRepo *repository.UserRepository
 }
 
-func NewAuthService(userRepo *repository.UserRepository) *AuthService {
-	return &AuthService{userRepo: userRepo}
+func NewAuthService(db *gorm.DB, userRepo *repository.UserRepository) *AuthService {
+	return &AuthService{db: db, userRepo: userRepo}
 }
 
 // Login logs in a user and returns user with JWT token
-func (s *AuthService) Login(email, password string) (*models.User, string, error) {
+func (s *AuthService) Login(ctx context.Context, email, password string) (*models.User, string, error) {
+	db := s.db.WithContext(ctx)
 	// Find user by email
-	user, err := s.userRepo.FindUserByEmail(email)
+	user, err := s.userRepo.FindUserByEmail(db, email)
 	if err != nil {
 		return nil, "", errors.New("invalid credentials")
 	}

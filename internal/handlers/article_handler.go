@@ -34,7 +34,7 @@ func (h *ArticleHandler) ListArticles(c *gin.Context) {
 	}
 
 	// Get articles from service
-	response, err := h.articleService.ListArticles(&query, currentUserID)
+	response, err := h.articleService.ListArticles(c.Request.Context(), &query, currentUserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch articles"})
 		return
@@ -64,7 +64,7 @@ func (h *ArticleHandler) FeedArticles(c *gin.Context) {
 		return
 	}
 
-	response, err := h.articleService.GetFeedArticles(userID.(int64), query.Limit, query.Offset)
+	response, err := h.articleService.GetFeedArticles(c.Request.Context(), userID.(int64), query.Limit, query.Offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch feed"})
 		return
@@ -84,7 +84,7 @@ func (h *ArticleHandler) GetArticle(c *gin.Context) {
 		currentUserID = &id
 	}
 
-	article, err := h.articleService.GetArticleBySlug(slug, currentUserID)
+	article, err := h.articleService.GetArticleBySlug(c.Request.Context(), slug, currentUserID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
 		return
@@ -109,7 +109,7 @@ func (h *ArticleHandler) CreateArticle(c *gin.Context) {
 		return
 	}
 
-	article, err := h.articleService.CreateArticle(&req, userID.(int64))
+	article, err := h.articleService.CreateArticle(c.Request.Context(), &req, userID.(int64))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create article"})
 		return
@@ -136,7 +136,7 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 		return
 	}
 
-	article, err := h.articleService.UpdateArticle(slug, &req, userID.(int64))
+	article, err := h.articleService.UpdateArticle(c.Request.Context(), slug, &req, userID.(int64))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
 		return
@@ -156,7 +156,7 @@ func (h *ArticleHandler) DeleteArticle(c *gin.Context) {
 		return
 	}
 
-	if err := h.articleService.DeleteArticle(slug); err != nil {
+	if err := h.articleService.DeleteArticle(c.Request.Context(), slug); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
 		return
 	}

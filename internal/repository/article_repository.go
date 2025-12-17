@@ -7,19 +7,18 @@ import (
 )
 
 type ArticleRepository struct {
-	db *gorm.DB
 }
 
-func NewArticleRepository(db *gorm.DB) *ArticleRepository {
-	return &ArticleRepository{db: db}
+func NewArticleRepository() *ArticleRepository {
+	return &ArticleRepository{}
 }
 
 // ListArticles lists articles with optional filtering and pagination
-func (r *ArticleRepository) ListArticles(tag, author string, favorited *bool, currentUserID *int64, limit, offset int) ([]*models.Article, int64, error) {
+func (r *ArticleRepository) ListArticles(db *gorm.DB, tag, author string, favorited *bool, currentUserID *int64, limit, offset int) ([]*models.Article, int64, error) {
 	var articles []*models.Article
 	var total int64
 
-	query := r.db
+	query := db
 
 	// Filter by tag
 	if tag != "" {
@@ -71,11 +70,11 @@ func (r *ArticleRepository) ListArticles(tag, author string, favorited *bool, cu
 }
 
 // FeedArticles gets articles from followed users
-func (r *ArticleRepository) FeedArticles(userID int64, limit, offset int) ([]*models.Article, int64, error) {
+func (r *ArticleRepository) FeedArticles(db *gorm.DB, userID int64, limit, offset int) ([]*models.Article, int64, error) {
 	var articles []*models.Article
 	var total int64
 
-	query := r.db.
+	query := db.
 		Joins("JOIN follows ON follows.followee_id = articles.author_id").
 		Where("follows.follower_id = ?", userID)
 
@@ -100,9 +99,9 @@ func (r *ArticleRepository) FeedArticles(userID int64, limit, offset int) ([]*mo
 }
 
 // FindArticleBySlug finds an article by slug
-func (r *ArticleRepository) FindArticleBySlug(slug string) (*models.Article, error) {
+func (r *ArticleRepository) FindArticleBySlug(db *gorm.DB, slug string) (*models.Article, error) {
 	var article *models.Article
-	if err := r.db.
+	if err := db.
 		Preload("Author").
 		Preload("ArticleTags.Tag").
 		Preload("Favorites").
@@ -114,43 +113,43 @@ func (r *ArticleRepository) FindArticleBySlug(slug string) (*models.Article, err
 }
 
 // CreateArticle creates a new article
-func (r *ArticleRepository) CreateArticle(article *models.Article) error {
-	if err := r.db.Create(article).Error; err != nil {
+func (r *ArticleRepository) CreateArticle(db *gorm.DB, article *models.Article) error {
+	if err := db.Create(article).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 // UpdateArticle updates an article
-func (r *ArticleRepository) UpdateArticle(article *models.Article) error {
-	if err := r.db.Model(article).Omit("Favorites").Save(article).Error; err != nil {
+func (r *ArticleRepository) UpdateArticle(db *gorm.DB, article *models.Article) error {
+	if err := db.Model(article).Omit("Favorites").Save(article).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 // DeleteArticleBySlug deletes an article by slug
-func (r *ArticleRepository) DeleteArticleBySlug(slug string) error {
-	if err := r.db.Where("slug = ?", slug).Delete(&models.Article{}).Error; err != nil {
+func (r *ArticleRepository) DeleteArticleBySlug(db *gorm.DB, slug string) error {
+	if err := db.Where("slug = ?", slug).Delete(&models.Article{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 // AssignTagsToArticle associates tags with an article
-func (r *ArticleRepository) AssignTagsToArticle(articleID int64, tagNames []string) error {
+func (r *ArticleRepository) AssignTagsToArticle(db *gorm.DB, articleID int64, tagNames []string) error {
 	if len(tagNames) == 0 {
 		return nil
 	}
 
 	// Delete existing article tags
-	if err := r.db.Where("article_id = ?", articleID).Delete(&models.ArticleTag{}).Error; err != nil {
+	if err := db.Where("article_id = ?", articleID).Delete(&models.ArticleTag{}).Error; err != nil {
 		return err
 	}
 
 	// Find existing tags by name
 	var existingTags []*models.Tag
-	if err := r.db.Where("name IN ?", tagNames).Find(&existingTags).Error; err != nil {
+	if err := db.Where("name IN ?", tagNames).Find(&existingTags).Error; err != nil {
 		return err
 	}
 
@@ -170,7 +169,7 @@ func (r *ArticleRepository) AssignTagsToArticle(articleID int64, tagNames []stri
 
 	// Create new tags in bulk
 	if len(tagsToCreate) > 0 {
-		if err := r.db.CreateInBatches(tagsToCreate, 100).Error; err != nil {
+		if err := db.CreateInBatches(tagsToCreate, 100).Error; err != nil {
 			return err
 		}
 		// Add newly created tags to the map
@@ -189,7 +188,7 @@ func (r *ArticleRepository) AssignTagsToArticle(articleID int64, tagNames []stri
 		})
 	}
 
-	if err := r.db.CreateInBatches(articleTags, 100).Error; err != nil {
+	if err := db.CreateInBatches(articleTags, 100).Error; err != nil {
 		return err
 	}
 

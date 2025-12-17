@@ -27,7 +27,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	}
 
 	// Register user
-	user, err := h.userService.RegisterUser(req.User.Username, req.User.Email, req.User.Password)
+	user, err := h.userService.RegisterUser(c.Request.Context(), req.User.Username, req.User.Email, req.User.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to register user"})
 		return
@@ -51,7 +51,7 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 	}
 
 	// Get user from database
-	user, err := h.userService.GetUserByID(userID.(int64))
+	user, err := h.userService.GetUserByID(c.Request.Context(), userID.(int64))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
@@ -83,7 +83,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	}
 
 	// Update user
-	user, err := h.userService.UpdateUser(userID.(int64), &req)
+	user, err := h.userService.UpdateUser(c.Request.Context(), userID.(int64), &req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to update user"})
 		return

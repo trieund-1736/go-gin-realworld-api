@@ -1,50 +1,58 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"go-gin-realworld-api/internal/dtos"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 var ErrForbidden = errors.New("forbidden")
 
 type CommentService struct {
+	db          *gorm.DB
 	commentRepo *repository.CommentRepository
 	articleRepo *repository.ArticleRepository
 }
 
-func NewCommentService(commentRepo *repository.CommentRepository, articleRepo *repository.ArticleRepository) *CommentService {
+func NewCommentService(db *gorm.DB, commentRepo *repository.CommentRepository, articleRepo *repository.ArticleRepository) *CommentService {
 	return &CommentService{
+		db:          db,
 		commentRepo: commentRepo,
 		articleRepo: articleRepo,
 	}
 }
 
 // CreateComment creates a new comment
-func (s *CommentService) CreateComment(req *dtos.CreateCommentRequest, slug string, authorID int64) (*dtos.CommentDetailResponse, error) {
-	// Get article by slug to get article ID
-	article, err := s.articleRepo.FindArticleBySlug(slug)
-	if err != nil {
-		return nil, err
-	}
+func (s *CommentService) CreateComment(ctx context.Context, req *dtos.CreateCommentRequest, slug string, authorID int64) (*dtos.CommentDetailResponse, error) {
+	db := s.db.WithContext(ctx)
 
-	comment := &models.Comment{
-		Body:      req.Comment.Body,
-		ArticleID: article.ID,
-		AuthorID:  authorID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
+	var createdComment *models.Comment
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		article, err := s.articleRepo.FindArticleBySlug(tx, slug)
+		if err != nil {
+			return err
+		}
 
-	if err := s.commentRepo.CreateComment(comment); err != nil {
-		return nil, err
-	}
+		comment := &models.Comment{
+			Body:      req.Comment.Body,
+			ArticleID: article.ID,
+			AuthorID:  authorID,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
 
-	// Fetch the created comment with preloaded data
-	createdComment, err := s.commentRepo.GetCommentByID(comment.ID)
-	if err != nil {
+		if err := s.commentRepo.CreateComment(tx, comment); err != nil {
+			return err
+		}
+
+		createdComment, err = s.commentRepo.GetCommentByID(tx, comment.ID)
+		return err
+	}); err != nil {
 		return nil, err
 	}
 
@@ -59,14 +67,15 @@ func (s *CommentService) CreateComment(req *dtos.CreateCommentRequest, slug stri
 }
 
 // GetCommentsByArticleSlug gets all comments for an article by slug
-func (s *CommentService) GetCommentsByArticleSlug(slug string) (*dtos.CommentsListResponse, error) {
+func (s *CommentService) GetCommentsByArticleSlug(ctx context.Context, slug string) (*dtos.CommentsListResponse, error) {
+	db := s.db.WithContext(ctx)
 	// Get article by slug to get article ID
-	article, err := s.articleRepo.FindArticleBySlug(slug)
+	article, err := s.articleRepo.FindArticleBySlug(db, slug)
 	if err != nil {
 		return nil, err
 	}
 
-	comments, err := s.commentRepo.GetCommentsByArticleID(article.ID)
+	comments, err := s.commentRepo.GetCommentsByArticleID(db, article.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -86,19 +95,21 @@ func (s *CommentService) GetCommentsByArticleSlug(slug string) (*dtos.CommentsLi
 }
 
 // DeleteComment deletes a comment by ID. Only comment author or article author can delete.
-func (s *CommentService) DeleteComment(id int64, currentUserID int64) error {
-	// Get comment to check ownership
-	comment, err := s.commentRepo.GetCommentByID(id)
-	if err != nil {
-		return err
-	}
+func (s *CommentService) DeleteComment(ctx context.Context, id int64, currentUserID int64) error {
+	db := s.db.WithContext(ctx)
+	return db.Transaction(func(tx *gorm.DB) error {
+		comment, err := s.commentRepo.GetCommentByID(tx, id)
+		if err != nil {
+			return err
+		}
 
-	// Check if current user is comment author or article author
-	if comment.AuthorID != currentUserID && comment.Article.AuthorID != currentUserID {
-		return ErrForbidden
-	}
+		// Check if current user is comment author or article author
+		if comment.AuthorID != currentUserID && comment.Article.AuthorID != currentUserID {
+			return ErrForbidden
+		}
 
-	return s.commentRepo.DeleteComment(id)
+		return s.commentRepo.DeleteComment(tx, id)
+	})
 }
 
 // commentToResponse converts a model Comment to CommentResponse DTO

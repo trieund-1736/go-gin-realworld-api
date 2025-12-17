@@ -7,31 +7,30 @@ import (
 )
 
 type FavoriteRepository struct {
-	db *gorm.DB
 }
 
-func NewFavoriteRepository(db *gorm.DB) *FavoriteRepository {
-	return &FavoriteRepository{db: db}
+func NewFavoriteRepository() *FavoriteRepository {
+	return &FavoriteRepository{}
 }
 
 // AddFavorite adds an article to user's favorites
-func (r *FavoriteRepository) AddFavorite(userID, articleID int64) error {
+func (r *FavoriteRepository) AddFavorite(db *gorm.DB, userID, articleID int64) error {
 	favorite := &models.Favorite{
 		UserID:    userID,
 		ArticleID: articleID,
 	}
-	return r.db.Create(favorite).Error
+	return db.Create(favorite).Error
 }
 
 // RemoveFavorite removes an article from user's favorites
-func (r *FavoriteRepository) RemoveFavorite(userID, articleID int64) error {
-	return r.db.Where("user_id = ? AND article_id = ?", userID, articleID).Delete(&models.Favorite{}).Error
+func (r *FavoriteRepository) RemoveFavorite(db *gorm.DB, userID, articleID int64) error {
+	return db.Where("user_id = ? AND article_id = ?", userID, articleID).Delete(&models.Favorite{}).Error
 }
 
 // IsFavorited checks if user has favorited an article
-func (r *FavoriteRepository) IsFavorited(userID, articleID int64) (bool, error) {
+func (r *FavoriteRepository) IsFavorited(db *gorm.DB, userID, articleID int64) (bool, error) {
 	var count int64
-	err := r.db.Model(&models.Favorite{}).Where("user_id = ? AND article_id = ?", userID, articleID).Count(&count).Error
+	err := db.Model(&models.Favorite{}).Where("user_id = ? AND article_id = ?", userID, articleID).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
@@ -39,9 +38,9 @@ func (r *FavoriteRepository) IsFavorited(userID, articleID int64) (bool, error) 
 }
 
 // GetArticleWithFavorites gets article with favorites count and list (for checking if favorited)
-func (r *FavoriteRepository) GetArticleWithFavorites(articleID int64) (*models.Article, error) {
+func (r *FavoriteRepository) GetArticleWithFavorites(db *gorm.DB, articleID int64) (*models.Article, error) {
 	var article *models.Article
-	err := r.db.
+	err := db.
 		Preload("Author").
 		Preload("ArticleTags.Tag").
 		Preload("Favorites").

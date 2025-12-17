@@ -1,25 +1,32 @@
 package services
 
 import (
+	"context"
+	"time"
+
 	"go-gin-realworld-api/internal/dtos"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
 	"go-gin-realworld-api/internal/utils"
-	"time"
+
+	"gorm.io/gorm"
 )
 
 type ArticleService struct {
+	db          *gorm.DB
 	articleRepo *repository.ArticleRepository
 }
 
-func NewArticleService(articleRepo *repository.ArticleRepository) *ArticleService {
+func NewArticleService(db *gorm.DB, articleRepo *repository.ArticleRepository) *ArticleService {
 	return &ArticleService{
+		db:          db,
 		articleRepo: articleRepo,
 	}
 }
 
 // ListArticles lists articles with optional filtering and pagination
-func (s *ArticleService) ListArticles(query *dtos.ListArticlesQuery, currentUserID *int64) (*dtos.ArticlesListResponse, error) {
+func (s *ArticleService) ListArticles(ctx context.Context, query *dtos.ListArticlesQuery, currentUserID *int64) (*dtos.ArticlesListResponse, error) {
+	db := s.db.WithContext(ctx)
 	// Set defaults for limit and offset
 	if query.Limit <= 0 {
 		query.Limit = 20
@@ -32,7 +39,7 @@ func (s *ArticleService) ListArticles(query *dtos.ListArticlesQuery, currentUser
 	}
 
 	// Get articles from repository
-	articles, total, err := s.articleRepo.ListArticles(query.Tag, query.Author, query.Favorited, currentUserID, query.Limit, query.Offset)
+	articles, total, err := s.articleRepo.ListArticles(db, query.Tag, query.Author, query.Favorited, currentUserID, query.Limit, query.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +100,8 @@ func (s *ArticleService) articleToResponse(article *models.Article, currentUserI
 }
 
 // GetFeedArticles gets articles from followed users
-func (s *ArticleService) GetFeedArticles(userID int64, limit, offset int) (*dtos.ArticlesListResponse, error) {
+func (s *ArticleService) GetFeedArticles(ctx context.Context, userID int64, limit, offset int) (*dtos.ArticlesListResponse, error) {
+	db := s.db.WithContext(ctx)
 	// Validate pagination parameters
 	if limit <= 0 {
 		limit = 20
@@ -105,7 +113,7 @@ func (s *ArticleService) GetFeedArticles(userID int64, limit, offset int) (*dtos
 		offset = 0
 	}
 
-	articles, total, err := s.articleRepo.FeedArticles(userID, limit, offset)
+	articles, total, err := s.articleRepo.FeedArticles(db, userID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +134,9 @@ func (s *ArticleService) GetFeedArticles(userID int64, limit, offset int) (*dtos
 }
 
 // GetArticleBySlug gets article by slug
-func (s *ArticleService) GetArticleBySlug(slug string, currentUserID *int64) (*dtos.ArticleDetailResponse, error) {
-	article, err := s.articleRepo.FindArticleBySlug(slug)
+func (s *ArticleService) GetArticleBySlug(ctx context.Context, slug string, currentUserID *int64) (*dtos.ArticleDetailResponse, error) {
+	db := s.db.WithContext(ctx)
+	article, err := s.articleRepo.FindArticleBySlug(db, slug)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +152,8 @@ func (s *ArticleService) GetArticleBySlug(slug string, currentUserID *int64) (*d
 }
 
 // CreateArticle creates a new article
-func (s *ArticleService) CreateArticle(req *dtos.CreateArticleRequest, authorID int64) (*dtos.ArticleDetailResponse, error) {
+func (s *ArticleService) CreateArticle(ctx context.Context, req *dtos.CreateArticleRequest, authorID int64) (*dtos.ArticleDetailResponse, error) {
+	db := s.db.WithContext(ctx)
 	slug := utils.GenerateSlug(req.Article.Title)
 
 	article := &models.Article{
@@ -156,19 +166,22 @@ func (s *ArticleService) CreateArticle(req *dtos.CreateArticleRequest, authorID 
 		UpdatedAt:   time.Now(),
 	}
 
-	if err := s.articleRepo.CreateArticle(article); err != nil {
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		if err := s.articleRepo.CreateArticle(tx, article); err != nil {
+			return err
+		}
+		if len(req.Article.TagList) > 0 {
+			if err := s.articleRepo.AssignTagsToArticle(tx, article.ID, req.Article.TagList); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	// Add tags if provided
-	if len(req.Article.TagList) > 0 {
-		if err := s.articleRepo.AssignTagsToArticle(article.ID, req.Article.TagList); err != nil {
-			return nil, err
-		}
-	}
-
 	// Fetch the created article with preloaded data
-	createdArticle, err := s.articleRepo.FindArticleBySlug(slug)
+	createdArticle, err := s.articleRepo.FindArticleBySlug(db, slug)
 	if err != nil {
 		return nil, err
 	}
@@ -184,39 +197,49 @@ func (s *ArticleService) CreateArticle(req *dtos.CreateArticleRequest, authorID 
 }
 
 // UpdateArticle updates an article
-func (s *ArticleService) UpdateArticle(slug string, req *dtos.UpdateArticleRequest, authorID int64) (*dtos.ArticleDetailResponse, error) {
-	article, err := s.articleRepo.FindArticleBySlug(slug)
-	if err != nil {
-		return nil, err
-	}
+func (s *ArticleService) UpdateArticle(ctx context.Context, slug string, req *dtos.UpdateArticleRequest, authorID int64) (*dtos.ArticleDetailResponse, error) {
+	db := s.db.WithContext(ctx)
+	finalSlug := slug
 
-	// Update fields if provided
-	if req.Article.Title != "" {
-		article.Title = req.Article.Title
-		article.Slug = utils.GenerateSlug(req.Article.Title) // Regenerate slug from new title
-	}
-	if req.Article.Description != "" {
-		article.Description = req.Article.Description
-	}
-	if req.Article.Body != "" {
-		article.Body = req.Article.Body
-	}
-
-	article.UpdatedAt = time.Now()
-
-	if err := s.articleRepo.UpdateArticle(article); err != nil {
-		return nil, err
-	}
-
-	// Update tags if provided
-	if len(req.Article.TagList) > 0 {
-		if err := s.articleRepo.AssignTagsToArticle(article.ID, req.Article.TagList); err != nil {
-			return nil, err
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		article, err := s.articleRepo.FindArticleBySlug(tx, slug)
+		if err != nil {
+			return err
 		}
+
+		// Update fields if provided
+		if req.Article.Title != "" {
+			article.Title = req.Article.Title
+			article.Slug = utils.GenerateSlug(req.Article.Title) // Regenerate slug from new title
+		}
+		if req.Article.Description != "" {
+			article.Description = req.Article.Description
+		}
+		if req.Article.Body != "" {
+			article.Body = req.Article.Body
+		}
+
+		article.UpdatedAt = time.Now()
+
+		if err := s.articleRepo.UpdateArticle(tx, article); err != nil {
+			return err
+		}
+
+		// Update tags if provided
+		if len(req.Article.TagList) > 0 {
+			if err := s.articleRepo.AssignTagsToArticle(tx, article.ID, req.Article.TagList); err != nil {
+				return err
+			}
+		}
+
+		finalSlug = article.Slug
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
 	// Fetch updated article
-	updatedArticle, err := s.articleRepo.FindArticleBySlug(article.Slug)
+	updatedArticle, err := s.articleRepo.FindArticleBySlug(db, finalSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -232,12 +255,12 @@ func (s *ArticleService) UpdateArticle(slug string, req *dtos.UpdateArticleReque
 }
 
 // DeleteArticle deletes an article
-func (s *ArticleService) DeleteArticle(slug string) error {
-	// Check if article exists first
-	_, err := s.articleRepo.FindArticleBySlug(slug)
-	if err != nil {
-		return err
-	}
-
-	return s.articleRepo.DeleteArticleBySlug(slug)
+func (s *ArticleService) DeleteArticle(ctx context.Context, slug string) error {
+	db := s.db.WithContext(ctx)
+	return db.Transaction(func(tx *gorm.DB) error {
+		if _, err := s.articleRepo.FindArticleBySlug(tx, slug); err != nil {
+			return err
+		}
+		return s.articleRepo.DeleteArticleBySlug(tx, slug)
+	})
 }

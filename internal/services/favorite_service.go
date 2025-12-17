@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"go-gin-realworld-api/internal/dtos"
 	"go-gin-realworld-api/internal/models"
@@ -10,49 +11,62 @@ import (
 )
 
 type FavoriteService struct {
+	db           *gorm.DB
 	favoriteRepo *repository.FavoriteRepository
 	articleRepo  *repository.ArticleRepository
 }
 
-func NewFavoriteService(favoriteRepo *repository.FavoriteRepository, articleRepo *repository.ArticleRepository) *FavoriteService {
+func NewFavoriteService(db *gorm.DB, favoriteRepo *repository.FavoriteRepository, articleRepo *repository.ArticleRepository) *FavoriteService {
 	return &FavoriteService{
+		db:           db,
 		favoriteRepo: favoriteRepo,
 		articleRepo:  articleRepo,
 	}
 }
 
 // FavoriteArticle adds article to user's favorites
-func (s *FavoriteService) FavoriteArticle(slug string, userID int64) (*dtos.ArticleDetailResponse, error) {
-	// Get article by slug
-	article, err := s.articleRepo.FindArticleBySlug(slug)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+func (s *FavoriteService) FavoriteArticle(ctx context.Context, slug string, userID int64) (*dtos.ArticleDetailResponse, error) {
+	db := s.db.WithContext(ctx)
+	var articleID int64
+	var notFound bool
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		article, err := s.articleRepo.FindArticleBySlug(tx, slug)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				notFound = true
+			}
+			return err
+		}
+		articleID = article.ID
+
+		// Check if already favorited
+		isFavorited, err := s.favoriteRepo.IsFavorited(tx, userID, article.ID)
+		if err != nil {
+			return err
+		}
+
+		if !isFavorited {
+			// Add favorite
+			if err := s.favoriteRepo.AddFavorite(tx, userID, article.ID); err != nil {
+				return err
+			}
+
+			// Increment favorites count
+			article.FavoritesCount++
+			if err := s.articleRepo.UpdateArticle(tx, article); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		if notFound {
 			return nil, errors.New("article not found")
 		}
 		return nil, err
 	}
 
-	// Check if already favorited
-	isFavorited, err := s.favoriteRepo.IsFavorited(userID, article.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	if !isFavorited {
-		// Add favorite
-		if err := s.favoriteRepo.AddFavorite(userID, article.ID); err != nil {
-			return nil, err
-		}
-
-		// Increment favorites count
-		article.FavoritesCount++
-		if err := s.articleRepo.UpdateArticle(article); err != nil {
-			return nil, err
-		}
-	}
-
 	// Get updated article with favorites info
-	updatedArticle, err := s.favoriteRepo.GetArticleWithFavorites(article.ID)
+	updatedArticle, err := s.favoriteRepo.GetArticleWithFavorites(db, articleID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,39 +83,50 @@ func (s *FavoriteService) FavoriteArticle(slug string, userID int64) (*dtos.Arti
 }
 
 // UnfavoriteArticle removes article from user's favorites
-func (s *FavoriteService) UnfavoriteArticle(slug string, userID int64) (*dtos.ArticleDetailResponse, error) {
-	// Get article by slug
-	article, err := s.articleRepo.FindArticleBySlug(slug)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+func (s *FavoriteService) UnfavoriteArticle(ctx context.Context, slug string, userID int64) (*dtos.ArticleDetailResponse, error) {
+	db := s.db.WithContext(ctx)
+	var articleID int64
+	var notFound bool
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		article, err := s.articleRepo.FindArticleBySlug(tx, slug)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				notFound = true
+			}
+			return err
+		}
+		articleID = article.ID
+
+		// Check if favorited
+		isFavorited, err := s.favoriteRepo.IsFavorited(tx, userID, article.ID)
+		if err != nil {
+			return err
+		}
+
+		if isFavorited {
+			// Remove favorite
+			if err := s.favoriteRepo.RemoveFavorite(tx, userID, article.ID); err != nil {
+				return err
+			}
+
+			// Decrement favorites count
+			if article.FavoritesCount > 0 {
+				article.FavoritesCount--
+				if err := s.articleRepo.UpdateArticle(tx, article); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}); err != nil {
+		if notFound {
 			return nil, errors.New("article not found")
 		}
 		return nil, err
 	}
 
-	// Check if favorited
-	isFavorited, err := s.favoriteRepo.IsFavorited(userID, article.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	if isFavorited {
-		// Remove favorite
-		if err := s.favoriteRepo.RemoveFavorite(userID, article.ID); err != nil {
-			return nil, err
-		}
-
-		// Decrement favorites count
-		if article.FavoritesCount > 0 {
-			article.FavoritesCount--
-			if err := s.articleRepo.UpdateArticle(article); err != nil {
-				return nil, err
-			}
-		}
-	}
-
 	// Get updated article with favorites info
-	updatedArticle, err := s.favoriteRepo.GetArticleWithFavorites(article.ID)
+	updatedArticle, err := s.favoriteRepo.GetArticleWithFavorites(db, articleID)
 	if err != nil {
 		return nil, err
 	}

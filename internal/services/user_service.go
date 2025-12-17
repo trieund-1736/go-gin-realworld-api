@@ -1,20 +1,25 @@
 package services
 
 import (
+	"context"
 	"database/sql"
 	"go-gin-realworld-api/internal/dtos"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
+
+	"gorm.io/gorm"
 )
 
 type UserService struct {
+	db          *gorm.DB
 	userRepo    *repository.UserRepository
 	profileRepo *repository.ProfileRepository
 	followRepo  *repository.FollowRepository
 }
 
-func NewUserService(userRepo *repository.UserRepository, profileRepo *repository.ProfileRepository, followRepo *repository.FollowRepository) *UserService {
+func NewUserService(db *gorm.DB, userRepo *repository.UserRepository, profileRepo *repository.ProfileRepository, followRepo *repository.FollowRepository) *UserService {
 	return &UserService{
+		db:          db,
 		userRepo:    userRepo,
 		profileRepo: profileRepo,
 		followRepo:  followRepo,
@@ -22,82 +27,93 @@ func NewUserService(userRepo *repository.UserRepository, profileRepo *repository
 }
 
 // RegisterUser registers a new user
-func (s *UserService) RegisterUser(username, email, password string) (*models.User, error) {
-	// Hash password
-	hashedPassword := hashPassword(password)
+func (s *UserService) RegisterUser(c context.Context, username, email, password string) (*models.User, error) {
 
-	user := &models.User{
-		Username: username,
-		Email:    email,
-		Password: hashedPassword,
-	}
+	var user *models.User
+	err := s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		// Hash password
+		hashedPassword := hashPassword(password)
 
-	// Create user in database
-	if err := s.userRepo.CreateUser(user); err != nil {
-		return nil, err
-	}
+		user = &models.User{
+			Username: username,
+			Email:    email,
+			Password: hashedPassword,
+		}
 
-	// Create associated profile
-	profile := &models.Profile{
-		UserID: user.ID,
-	}
-	if err := s.profileRepo.CreateProfile(profile); err != nil {
-		return nil, err
-	}
+		// Create user in database
+		if err := s.userRepo.CreateUser(tx, user); err != nil {
+			return err
+		}
 
-	return user, nil
+		// Create associated profile
+		profile := &models.Profile{
+			UserID: user.ID,
+		}
+		if err := s.profileRepo.CreateProfile(tx, profile); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	return user, err
 }
 
 // GetUserByID gets user by ID
-func (s *UserService) GetUserByID(id int64) (*models.User, error) {
-	return s.userRepo.FindUserByID(id)
+func (s *UserService) GetUserByID(c context.Context, id int64) (*models.User, error) {
+	return s.userRepo.FindUserByID(s.db.WithContext(c), id)
 }
 
 // UpdateUser updates user information
-func (s *UserService) UpdateUser(userID int64, req *dtos.UpdateUserRequest) (*models.User, error) {
-	// Get user
-	user, err := s.userRepo.FindUserByID(userID)
-	if err != nil {
-		return nil, err
-	}
+func (s *UserService) UpdateUser(c context.Context, userID int64, req *dtos.UpdateUserRequest) (*models.User, error) {
+	var user *models.User
 
-	// Update user fields if provided
-	if req.User.Email != "" {
-		user.Email = req.User.Email
-	}
-	if req.User.Username != "" {
-		user.Username = req.User.Username
-	}
-	if req.User.Password != "" {
-		user.Password = hashPassword(req.User.Password)
-	}
-
-	// Update user
-	if err := s.userRepo.UpdateUser(user); err != nil {
-		return nil, err
-	}
-
-	// Get or create profile
-	profile, err := s.profileRepo.FindProfileByUserID(userID)
-	if err != nil {
-		// Create new profile if not exists
-		profile = &models.Profile{
-			UserID: userID,
+	err := s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		// Get user
+		user, err := s.userRepo.FindUserByID(tx, userID)
+		if err != nil {
+			return err
 		}
-	}
 
-	// Update profile fields if provided
-	if req.User.Image != "" {
-		profile.Image = sql.NullString{String: req.User.Image, Valid: true}
-	}
-	if req.User.Bio != "" {
-		profile.Bio = sql.NullString{String: req.User.Bio, Valid: true}
-	}
+		// Update user fields if provided
+		if req.User.Email != "" {
+			user.Email = req.User.Email
+		}
+		if req.User.Username != "" {
+			user.Username = req.User.Username
+		}
+		if req.User.Password != "" {
+			user.Password = hashPassword(req.User.Password)
+		}
 
-	// Update profile
-	if err := s.profileRepo.UpdateProfile(profile); err != nil {
-		return nil, err
-	}
+		// Update user
+		if err := s.userRepo.UpdateUser(tx, user); err != nil {
+			return err
+		}
 
-	return user, nil
+		// Get or create profile
+		profile, err := s.profileRepo.FindProfileByUserID(tx, userID)
+		if err != nil {
+			// Create new profile if not exists
+			profile = &models.Profile{
+				UserID: userID,
+			}
+		}
+
+		// Update profile fields if provided
+		if req.User.Image != "" {
+			profile.Image = sql.NullString{String: req.User.Image, Valid: true}
+		}
+		if req.User.Bio != "" {
+			profile.Bio = sql.NullString{String: req.User.Bio, Valid: true}
+		}
+
+		// Update profile
+		if err := s.profileRepo.UpdateProfile(tx, profile); err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return user, err
 }
