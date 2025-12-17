@@ -32,7 +32,7 @@ func (s *ArticleService) ListArticles(query *dtos.ListArticlesQuery, currentUser
 	}
 
 	// Get articles from repository
-	articles, total, err := s.articleRepo.ListArticles(query.Tag, query.Author, query.Favorited, query.Limit, query.Offset)
+	articles, total, err := s.articleRepo.ListArticles(query.Tag, query.Author, query.Favorited, currentUserID, query.Limit, query.Offset)
 	if err != nil {
 		return nil, err
 	}

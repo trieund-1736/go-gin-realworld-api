@@ -409,9 +409,9 @@ paths:
           in: query
           required: false
           schema:
-            type: string
-          description: Filter articles favorited by a specific user (username)
-          example: jane_doe
+            type: boolean
+          description: Filter articles by favorite status (true = favorited by current user, false = not favorited by current user). Authentication required for this filter.
+          example: true
         - name: limit
           in: query
           required: false

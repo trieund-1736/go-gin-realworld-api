@@ -3,7 +3,7 @@ package dtos
 type ListArticlesQuery struct {
 	Tag       string `form:"tag"`
 	Author    string `form:"author"`
-	Favorited string `form:"favorited"`
+	Favorited *bool  `form:"favorited"`
 	Limit     int    `form:"limit,default=20"`
 	Offset    int    `form:"offset,default=0"`
 }

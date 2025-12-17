@@ -15,7 +15,7 @@ func NewArticleRepository(db *gorm.DB) *ArticleRepository {
 }
 
 // ListArticles lists articles with optional filtering and pagination
-func (r *ArticleRepository) ListArticles(tag, author, favorited string, limit, offset int) ([]*models.Article, int64, error) {
+func (r *ArticleRepository) ListArticles(tag, author string, favorited *bool, currentUserID *int64, limit, offset int) ([]*models.Article, int64, error) {
 	var articles []*models.Article
 	var total int64
 
@@ -36,12 +36,18 @@ func (r *ArticleRepository) ListArticles(tag, author, favorited string, limit, o
 			Where("author_user.username = ?", author)
 	}
 
-	// Filter by favorited (user who favorited the article)
-	if favorited != "" {
-		query = query.
-			Joins("JOIN favorites ON favorites.article_id = articles.id").
-			Joins("JOIN users AS favorite_user ON favorite_user.id = favorites.user_id").
-			Where("favorite_user.username = ?", favorited)
+	// Filter by favorited (whether current user has favorited the article)
+	if favorited != nil && currentUserID != nil {
+		if *favorited {
+			// Get articles favorited by current user
+			query = query.
+				Joins("JOIN favorites ON favorites.article_id = articles.id").
+				Where("favorites.user_id = ?", *currentUserID)
+		} else {
+			// Get articles NOT favorited by current user
+			query = query.
+				Where("articles.id NOT IN (SELECT article_id FROM favorites WHERE user_id = ?)", *currentUserID)
+		}
 	}
 
 	// Get total count before pagination
