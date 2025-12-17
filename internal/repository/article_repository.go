@@ -123,7 +123,7 @@ func (r *ArticleRepository) CreateArticle(article *models.Article) error {
 
 // UpdateArticle updates an article
 func (r *ArticleRepository) UpdateArticle(article *models.Article) error {
-	if err := r.db.Save(article).Error; err != nil {
+	if err := r.db.Model(article).Omit("Favorites").Save(article).Error; err != nil {
 		return err
 	}
 	return nil

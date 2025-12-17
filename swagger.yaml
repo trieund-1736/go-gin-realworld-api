@@ -1024,6 +1024,147 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /api/articles/{slug}/favorite:
+    post:
+      summary: Favorite an article
+      description: Add an article to the current user's favorites. Authentication required.
+      operationId: favoriteArticle
+      tags:
+        - Articles
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: URL-friendly article slug
+          example: how-to-learn-golang
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Article favorited successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    type: object
+                    properties:
+                      slug:
+                        type: string
+                        example: how-to-learn-golang
+                      title:
+                        type: string
+                        example: How to Learn Golang
+                      description:
+                        type: string
+                        example: A beginner's guide
+                      body:
+                        type: string
+                        example: Golang is powerful...
+                      tagList:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - golang
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: 2025-12-17T10:00:00Z
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: 2025-12-17T10:30:00Z
+                      favorited:
+                        type: boolean
+                        example: true
+                      favoritesCount:
+                        type: integer
+                        example: 6
+                      author:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                            example: john_doe
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      summary: Unfavorite an article
+      description: Remove an article from the current user's favorites. Authentication required.
+      operationId: unfavoriteArticle
+      tags:
+        - Articles
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: URL-friendly article slug
+          example: how-to-learn-golang
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Article unfavorited successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  article:
+                    type: object
+                    properties:
+                      slug:
+                        type: string
+                        example: how-to-learn-golang
+                      title:
+                        type: string
+                        example: How to Learn Golang
+                      description:
+                        type: string
+                        example: A beginner's guide
+                      body:
+                        type: string
+                        example: Golang is powerful...
+                      tagList:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                          - golang
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: 2025-12-17T10:00:00Z
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: 2025-12-17T10:30:00Z
+                      favorited:
+                        type: boolean
+                        example: false
+                      favoritesCount:
+                        type: integer
+                        example: 5
+                      author:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                            example: john_doe
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 components:
   responses:
     BadRequest:

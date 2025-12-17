@@ -50,9 +50,9 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 			articles.GET("/:slug/comments", middleware.JWTOptionalAuthMiddleware(), appContainer.CommentHandler.GetComments)  // Get comments (optional auth)
 			articles.DELETE("/:slug/comments/:id", middleware.JWTAuthMiddleware(), appContainer.CommentHandler.DeleteComment) // Delete comment (auth required)
 
-			// Favorites (TODO: implement)
-			articles.POST("/:slug/favorite", favoriteArticle)     // Favorite
-			articles.DELETE("/:slug/favorite", unfavoriteArticle) // Unfavorite
+			// Favorites
+			articles.POST("/:slug/favorite", middleware.JWTAuthMiddleware(), appContainer.FavoriteHandler.FavoriteArticle)     // Favorite (auth required)
+			articles.DELETE("/:slug/favorite", middleware.JWTAuthMiddleware(), appContainer.FavoriteHandler.UnfavoriteArticle) // Unfavorite (auth required)
 		}
 
 		// Tags (TODO: implement)
@@ -61,6 +61,4 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 }
 
 // Handler stubs (TODO: implement)
-func favoriteArticle(c *gin.Context)   { c.JSON(501, gin.H{"error": "not implemented"}) }
-func unfavoriteArticle(c *gin.Context) { c.JSON(501, gin.H{"error": "not implemented"}) }
-func getTags(c *gin.Context)           { c.JSON(501, gin.H{"error": "not implemented"}) }
+func getTags(c *gin.Context) { c.JSON(501, gin.H{"error": "not implemented"}) }
