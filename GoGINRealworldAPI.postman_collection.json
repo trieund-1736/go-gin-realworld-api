@@ -1,0 +1,723 @@
+{
+	"info": {
+		"_postman_id": "31b42731-40a1-4e08-a2bb-f2d46b0de4bc",
+		"name": "GoGINRealworldAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6842206"
+	},
+	"item": [
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user\": {\n    \"username\": \"john_doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8080/api/users' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"user\": {\n    \"username\": \"john_doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n  }\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "GET current user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/api/user' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user\": {\n    \"email\": \"newemail@example.com\",\n    \"username\": \"new_username\",\n    \"password\": \"newpassword123\",\n    \"image\": \"https://example.com/avatar.jpg\",\n    \"bio\": \"This is my bio\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'PUT' \\\n  'http://localhost:8080/api/user' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"user\": {\n    \"email\": \"newemail@example.com\",\n    \"username\": \"new_username\",\n    \"password\": \"newpassword123\",\n    \"image\": \"https://example.com/avatar.jpg\",\n    \"bio\": \"This is my bio\"\n  }\n}'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "profile",
+			"item": [
+				{
+					"name": "Get user profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/profiles/john_doe",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"profiles",
+								"john_doe"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/api/profiles/re' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "Follow profile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/profiles/john_doe/follow",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"profiles",
+								"john_doe",
+								"follow"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8080/api/profiles/john_doe/follow' \\\n  -H 'accept: application/json' \\\n  -d ''"
+					},
+					"response": []
+				},
+				{
+					"name": "Unfollow profile",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/profiles/john_doe/follow",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"profiles",
+								"john_doe",
+								"follow"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'DELETE' \\\n  'http://localhost:8080/api/profiles/d/follow' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "article",
+			"item": [
+				{
+					"name": "List articles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/articles?tag=golang&author=john_doe&favorited=true&limit=20&offset=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles"
+							],
+							"query": [
+								{
+									"key": "tag",
+									"value": "golang"
+								},
+								{
+									"key": "author",
+									"value": "john_doe"
+								},
+								{
+									"key": "favorited",
+									"value": "true"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/api/articles?tag=golang&author=john_doe&favorited=jane_doe&limit=20&offset=0' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get article feed",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/articles/feed?limit=20&offset=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"feed"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/api/articles/feed?limit=20&offset=0' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get article by slug",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/articles/updated-article-title",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"updated-article-title"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/api/articles/how-to-learn-golang' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "Create article",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"article\": {\n    \"title\": \"How to Learn Golang\",\n    \"description\": \"A comprehensive guide for beginners\",\n    \"body\": \"Golang is a powerful programming language...\",\n    \"tagList\": [\n      \"golang\",\n      \"tutorial\"\n    ]\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/articles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8080/api/articles/{slug}' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"article\": {\n    \"title\": \"How to Learn Golang\",\n    \"description\": \"A comprehensive guide for beginners\",\n    \"body\": \"Golang is a powerful programming language...\",\n    \"tagList\": [\n      \"golang\",\n      \"tutorial\"\n    ]\n  }\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Update article",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"article\": {\n    \"title\": \"Updated Article Title\",\n    \"description\": \"Updated article description\",\n    \"body\": \"Updated article body content...\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/articles/how-to-learn-golang",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"how-to-learn-golang"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'PUT' \\\n  'http://localhost:8080/api/articles/how-to-learn-golang' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"article\": {\n    \"title\": \"Updated Article Title\",\n    \"description\": \"Updated article description\",\n    \"body\": \"Updated article body content...\"\n  }\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete article",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/articles/updated-article-title",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"updated-article-title"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'DELETE' \\\n  'http://localhost:8080/api/articles/how-to-learn-golang' \\\n  -H 'accept: */*'"
+					},
+					"response": []
+				},
+				{
+					"name": "Favorite article",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/articles/how-to-learn-golang/favorite",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"how-to-learn-golang",
+								"favorite"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8080/api/articles/how-to-learn-golang/favorite' \\\n  -H 'accept: application/json' \\\n  -d ''"
+					},
+					"response": []
+				},
+				{
+					"name": "Unfavorite article",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/articles/how-to-learn-golang/favorite",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"how-to-learn-golang",
+								"favorite"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'DELETE' \\\n  'http://localhost:8080/api/articles/how-to-learn-golang/favorite' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "comment",
+			"item": [
+				{
+					"name": "Create comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"comment\": {\n    \"body\": \"Great article! Really helpful.\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/articles/how-to-learn-golang/comments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"how-to-learn-golang",
+								"comments"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8080/api/articles/how-to-learn-golang/comments' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"comment\": {\n    \"body\": \"Great article! Really helpful.\"\n  }\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get article comments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/articles/how-to-learn-golang/comments",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"how-to-learn-golang",
+								"comments"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/api/articles/how-to-learn-golang/comments' \\\n  -H 'accept: application/json'"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete comment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/articles/how-to-learn-golang/comments/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"articles",
+								"how-to-learn-golang",
+								"comments",
+								"1"
+							]
+						},
+						"description": "Generated from cURL: curl -X 'DELETE' \\\n  'http://localhost:8080/api/articles/how-to-learn-golang/comments/1' \\\n  -H 'accept: */*'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"health"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/health' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"user\": {\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/users/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"users",
+						"login"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://localhost:8080/api/users/login' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\n  \"user\": {\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\"\n  }\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Get all tags",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/tags",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"tags"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'http://localhost:8080/api/tags' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6ImpvaG5AZXhhbXBsZS5jb20iLCJleHAiOjE3NjYwNDI4OTcsImlhdCI6MTc2NTk1NjQ5N30.WCGyDp5-Uw7iV9clqj2E6Uk2UMZYQ06v2QAE_nFcu4I",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": ""
+		}
+	]
+}
