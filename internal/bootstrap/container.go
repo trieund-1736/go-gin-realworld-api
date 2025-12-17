@@ -13,6 +13,7 @@ type AppContainer struct {
 	AuthHandler    *handlers.AuthHandler
 	ProfileHandler *handlers.ProfileHandler
 	ArticleHandler *handlers.ArticleHandler
+	CommentHandler *handlers.CommentHandler
 }
 
 func NewAppContainer() *AppContainer {
@@ -21,23 +22,27 @@ func NewAppContainer() *AppContainer {
 	profileRepo := repository.NewProfileRepository(config.DB)
 	followRepo := repository.NewFollowRepository(config.DB)
 	articleRepo := repository.NewArticleRepository(config.DB)
+	commentRepo := repository.NewCommentRepository(config.DB)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo)
 	userService := services.NewUserService(userRepo, profileRepo, followRepo)
 	profileService := services.NewProfileService(userRepo, profileRepo, followRepo)
 	articleService := services.NewArticleService(articleRepo)
+	commentService := services.NewCommentService(commentRepo, articleRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
 	profileHandler := handlers.NewProfileHandler(profileService)
 	articleHandler := handlers.NewArticleHandler(articleService)
+	commentHandler := handlers.NewCommentHandler(commentService)
 
 	return &AppContainer{
 		UserHandler:    userHandler,
 		AuthHandler:    authHandler,
 		ProfileHandler: profileHandler,
 		ArticleHandler: articleHandler,
+		CommentHandler: commentHandler,
 	}
 }

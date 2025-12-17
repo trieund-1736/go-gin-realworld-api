@@ -35,7 +35,7 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 			profiles.GET("/:username", middleware.JWTOptionalAuthMiddleware(), appContainer.ProfileHandler.GetProfile)     // Get profile (optional auth)
 			profiles.POST("/:username/follow", middleware.JWTAuthMiddleware(), appContainer.ProfileHandler.FollowUser)     // Follow user (required auth)
 			profiles.DELETE("/:username/follow", middleware.JWTAuthMiddleware(), appContainer.ProfileHandler.UnfollowUser) // Unfollow user (required auth)
-		} // Article routes (TODO: implement)
+		} // Article routes
 		articles := api.Group("/articles")
 		{
 			articles.GET("", middleware.JWTOptionalAuthMiddleware(), appContainer.ArticleHandler.ListArticles)     // List articles
@@ -45,10 +45,10 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 			articles.PUT("/:slug", middleware.JWTAuthMiddleware(), appContainer.ArticleHandler.UpdateArticle)      // Update article (auth required)
 			articles.DELETE("/:slug", middleware.JWTAuthMiddleware(), appContainer.ArticleHandler.DeleteArticle)   // Delete article (auth required)
 
-			// Comments (TODO: implement)
-			articles.POST("/:slug/comments", addComment)          // Add comment
-			articles.GET("/:slug/comments", getComments)          // Get comments
-			articles.DELETE("/:slug/comments/:id", deleteComment) // Delete comment
+			// Comments
+			articles.POST("/:slug/comments", middleware.JWTAuthMiddleware(), appContainer.CommentHandler.CreateComment)       // Add comment (auth required)
+			articles.GET("/:slug/comments", middleware.JWTOptionalAuthMiddleware(), appContainer.CommentHandler.GetComments)  // Get comments (optional auth)
+			articles.DELETE("/:slug/comments/:id", middleware.JWTAuthMiddleware(), appContainer.CommentHandler.DeleteComment) // Delete comment (auth required)
 
 			// Favorites (TODO: implement)
 			articles.POST("/:slug/favorite", favoriteArticle)     // Favorite
@@ -61,15 +61,6 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 }
 
 // Handler stubs (TODO: implement)
-func listArticles(c *gin.Context)      { c.JSON(501, gin.H{"error": "not implemented"}) }
-func feedArticles(c *gin.Context)      { c.JSON(501, gin.H{"error": "not implemented"}) }
-func getArticle(c *gin.Context)        { c.JSON(501, gin.H{"error": "not implemented"}) }
-func createArticle(c *gin.Context)     { c.JSON(501, gin.H{"error": "not implemented"}) }
-func updateArticle(c *gin.Context)     { c.JSON(501, gin.H{"error": "not implemented"}) }
-func deleteArticle(c *gin.Context)     { c.JSON(501, gin.H{"error": "not implemented"}) }
-func addComment(c *gin.Context)        { c.JSON(501, gin.H{"error": "not implemented"}) }
-func getComments(c *gin.Context)       { c.JSON(501, gin.H{"error": "not implemented"}) }
-func deleteComment(c *gin.Context)     { c.JSON(501, gin.H{"error": "not implemented"}) }
 func favoriteArticle(c *gin.Context)   { c.JSON(501, gin.H{"error": "not implemented"}) }
 func unfavoriteArticle(c *gin.Context) { c.JSON(501, gin.H{"error": "not implemented"}) }
 func getTags(c *gin.Context)           { c.JSON(501, gin.H{"error": "not implemented"}) }

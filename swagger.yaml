@@ -848,6 +848,182 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /api/articles/{slug}/comments:
+    post:
+      summary: Create comment on article
+      description: Add a comment to an article. Authentication required.
+      operationId: createComment
+      tags:
+        - Comments
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: URL-friendly article slug
+          example: how-to-learn-golang
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - comment
+              properties:
+                comment:
+                  type: object
+                  required:
+                    - body
+                  properties:
+                    body:
+                      type: string
+                      example: Great article! Really helpful.
+      security:
+        - BearerAuth: []
+      responses:
+        "201":
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        example: 1
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: 2025-12-17T10:00:00Z
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: 2025-12-17T10:00:00Z
+                      body:
+                        type: string
+                        example: Great article! Really helpful.
+                      author:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                            example: john_doe
+                          bio:
+                            type: string
+                            example: Software developer
+                          image:
+                            type: string
+                            example: https://example.com/avatar.jpg
+                          following:
+                            type: boolean
+                            example: false
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    get:
+      summary: Get article comments
+      description: Get all comments for an article. Authentication is optional.
+      operationId: getComments
+      tags:
+        - Comments
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: URL-friendly article slug
+          example: how-to-learn-golang
+      security: []
+      responses:
+        "200":
+          description: Comments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          example: 1
+                        createdAt:
+                          type: string
+                          format: date-time
+                          example: 2025-12-17T10:00:00Z
+                        updatedAt:
+                          type: string
+                          format: date-time
+                          example: 2025-12-17T10:00:00Z
+                        body:
+                          type: string
+                          example: Great article! Really helpful.
+                        author:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: john_doe
+                            bio:
+                              type: string
+                              example: Software developer
+                            image:
+                              type: string
+                              example: https://example.com/avatar.jpg
+                            following:
+                              type: boolean
+                              example: false
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/articles/{slug}/comments/{id}:
+    delete:
+      summary: Delete comment
+      description: Delete a comment from an article. Authentication required.
+      operationId: deleteComment
+      tags:
+        - Comments
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: URL-friendly article slug
+          example: how-to-learn-golang
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Comment ID
+          example: 1
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Comment deleted successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 components:
   responses:
     BadRequest:
@@ -908,3 +1084,5 @@ tags:
     description: User profile endpoints (Get profile, Follow, Unfollow)
   - name: Articles
     description: Articles listing and management endpoints
+  - name: Comments
+    description: Comments management endpoints
