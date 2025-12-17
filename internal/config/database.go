@@ -50,6 +50,11 @@ func MigrateDB() error {
 		&models.User{},
 		&models.Profile{},
 		&models.Follow{},
+		&models.Article{},
+		&models.Comment{},
+		&models.Favorite{},
+		&models.Tag{},
+		&models.ArticleTag{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 		return err
