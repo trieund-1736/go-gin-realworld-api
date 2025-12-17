@@ -4,6 +4,8 @@ import (
 	"go-gin-realworld-api/internal/dtos"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
+	"go-gin-realworld-api/internal/utils"
+	"time"
 )
 
 type ArticleService struct {
@@ -88,4 +90,154 @@ func (s *ArticleService) articleToResponse(article *models.Article, currentUserI
 			Username: article.Author.Username,
 		},
 	}, nil
+}
+
+// GetFeedArticles gets articles from followed users
+func (s *ArticleService) GetFeedArticles(userID int64, limit, offset int) (*dtos.ArticlesListResponse, error) {
+	// Validate pagination parameters
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	articles, total, err := s.articleRepo.FeedArticles(userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	articleResponses := make([]dtos.ArticleResponse, 0)
+	for _, article := range articles {
+		resp, err := s.articleToResponse(article, &userID)
+		if err != nil {
+			return nil, err
+		}
+		articleResponses = append(articleResponses, resp)
+	}
+
+	return &dtos.ArticlesListResponse{
+		Articles:      articleResponses,
+		ArticlesCount: int(total),
+	}, nil
+}
+
+// GetArticleBySlug gets article by slug
+func (s *ArticleService) GetArticleBySlug(slug string, currentUserID *int64) (*dtos.ArticleDetailResponse, error) {
+	article, err := s.articleRepo.FindArticleBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.articleToResponse(article, currentUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dtos.ArticleDetailResponse{
+		Article: resp,
+	}, nil
+}
+
+// CreateArticle creates a new article
+func (s *ArticleService) CreateArticle(req *dtos.CreateArticleRequest, authorID int64) (*dtos.ArticleDetailResponse, error) {
+	slug := utils.GenerateSlug(req.Article.Title)
+
+	article := &models.Article{
+		Slug:        slug,
+		Title:       req.Article.Title,
+		Description: req.Article.Description,
+		Body:        req.Article.Body,
+		AuthorID:    authorID,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	if err := s.articleRepo.CreateArticle(article); err != nil {
+		return nil, err
+	}
+
+	// Add tags if provided
+	if len(req.Article.TagList) > 0 {
+		if err := s.articleRepo.AssignTagsToArticle(article.ID, req.Article.TagList); err != nil {
+			return nil, err
+		}
+	}
+
+	// Fetch the created article with preloaded data
+	createdArticle, err := s.articleRepo.FindArticleBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.articleToResponse(createdArticle, &authorID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dtos.ArticleDetailResponse{
+		Article: resp,
+	}, nil
+}
+
+// UpdateArticle updates an article
+func (s *ArticleService) UpdateArticle(slug string, req *dtos.UpdateArticleRequest, authorID int64) (*dtos.ArticleDetailResponse, error) {
+	article, err := s.articleRepo.FindArticleBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update fields if provided
+	if req.Article.Title != "" {
+		article.Title = req.Article.Title
+		article.Slug = utils.GenerateSlug(req.Article.Title) // Regenerate slug from new title
+	}
+	if req.Article.Description != "" {
+		article.Description = req.Article.Description
+	}
+	if req.Article.Body != "" {
+		article.Body = req.Article.Body
+	}
+
+	article.UpdatedAt = time.Now()
+
+	if err := s.articleRepo.UpdateArticle(article); err != nil {
+		return nil, err
+	}
+
+	// Update tags if provided
+	if len(req.Article.TagList) > 0 {
+		if err := s.articleRepo.AssignTagsToArticle(article.ID, req.Article.TagList); err != nil {
+			return nil, err
+		}
+	}
+
+	// Fetch updated article
+	updatedArticle, err := s.articleRepo.FindArticleBySlug(article.Slug)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.articleToResponse(updatedArticle, &authorID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dtos.ArticleDetailResponse{
+		Article: resp,
+	}, nil
+}
+
+// DeleteArticle deletes an article
+func (s *ArticleService) DeleteArticle(slug string) error {
+	// Check if article exists first
+	_, err := s.articleRepo.FindArticleBySlug(slug)
+	if err != nil {
+		return err
+	}
+
+	return s.articleRepo.DeleteArticleBySlug(slug)
 }

@@ -38,12 +38,12 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 		} // Article routes (TODO: implement)
 		articles := api.Group("/articles")
 		{
-			articles.GET("", middleware.JWTOptionalAuthMiddleware(), appContainer.ArticleHandler.ListArticles) // List articles
-			articles.GET("/feed", feedArticles)                                                                // Get feed (auth required)
-			articles.GET("/:slug", getArticle)                                                                 // Get article by slug
-			articles.POST("", createArticle)                                                                   // Create article (auth required)
-			articles.PUT("/:slug", updateArticle)                                                              // Update article (auth required)
-			articles.DELETE("/:slug", deleteArticle)                                                           // Delete article (auth required)
+			articles.GET("", middleware.JWTOptionalAuthMiddleware(), appContainer.ArticleHandler.ListArticles)     // List articles
+			articles.GET("/feed", middleware.JWTAuthMiddleware(), appContainer.ArticleHandler.FeedArticles)        // Get feed (auth required)
+			articles.GET("/:slug", middleware.JWTOptionalAuthMiddleware(), appContainer.ArticleHandler.GetArticle) // Get article by slug
+			articles.POST("", middleware.JWTAuthMiddleware(), appContainer.ArticleHandler.CreateArticle)           // Create article (auth required)
+			articles.PUT("/:slug", middleware.JWTAuthMiddleware(), appContainer.ArticleHandler.UpdateArticle)      // Update article (auth required)
+			articles.DELETE("/:slug", middleware.JWTAuthMiddleware(), appContainer.ArticleHandler.DeleteArticle)   // Delete article (auth required)
 
 			// Comments (TODO: implement)
 			articles.POST("/:slug/comments", addComment)          // Add comment
