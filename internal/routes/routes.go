@@ -55,10 +55,7 @@ func SetupRoutes(router *gin.Engine, appContainer *bootstrap.AppContainer) {
 			articles.DELETE("/:slug/favorite", middleware.JWTAuthMiddleware(), appContainer.FavoriteHandler.UnfavoriteArticle) // Unfavorite (auth required)
 		}
 
-		// Tags (TODO: implement)
-		api.GET("/tags", getTags)
+		// Tags
+		api.GET("/tags", appContainer.TagHandler.GetTags)
 	}
 }
-
-// Handler stubs (TODO: implement)
-func getTags(c *gin.Context) { c.JSON(501, gin.H{"error": "not implemented"}) }

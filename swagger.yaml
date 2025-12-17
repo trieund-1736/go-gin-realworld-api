@@ -1165,6 +1165,31 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /api/tags:
+    get:
+      summary: Get all tags
+      description: Retrieve a list of all unique tags. No authentication required.
+      operationId: getTags
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: Tags retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - golang
+                      - docker
+                      - kubernetes
+                      - web-development
+
 components:
   responses:
     BadRequest:
@@ -1227,3 +1252,5 @@ tags:
     description: Articles listing and management endpoints
   - name: Comments
     description: Comments management endpoints
+  - name: Tags
+    description: Tags listing endpoint

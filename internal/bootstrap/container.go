@@ -15,6 +15,7 @@ type AppContainer struct {
 	ArticleHandler  *handlers.ArticleHandler
 	CommentHandler  *handlers.CommentHandler
 	FavoriteHandler *handlers.FavoriteHandler
+	TagHandler      *handlers.TagHandler
 }
 
 func NewAppContainer() *AppContainer {
@@ -25,6 +26,7 @@ func NewAppContainer() *AppContainer {
 	articleRepo := repository.NewArticleRepository(config.DB)
 	commentRepo := repository.NewCommentRepository(config.DB)
 	favoriteRepo := repository.NewFavoriteRepository(config.DB)
+	tagRepo := repository.NewTagRepository(config.DB)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo)
@@ -33,6 +35,7 @@ func NewAppContainer() *AppContainer {
 	articleService := services.NewArticleService(articleRepo)
 	commentService := services.NewCommentService(commentRepo, articleRepo)
 	favoriteService := services.NewFavoriteService(favoriteRepo, articleRepo)
+	tagService := services.NewTagService(tagRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -41,6 +44,7 @@ func NewAppContainer() *AppContainer {
 	articleHandler := handlers.NewArticleHandler(articleService)
 	commentHandler := handlers.NewCommentHandler(commentService)
 	favoriteHandler := handlers.NewFavoriteHandler(favoriteService)
+	tagHandler := handlers.NewTagHandler(tagService)
 
 	return &AppContainer{
 		UserHandler:     userHandler,
@@ -49,5 +53,6 @@ func NewAppContainer() *AppContainer {
 		ArticleHandler:  articleHandler,
 		CommentHandler:  commentHandler,
 		FavoriteHandler: favoriteHandler,
+		TagHandler:      tagHandler,
 	}
 }
