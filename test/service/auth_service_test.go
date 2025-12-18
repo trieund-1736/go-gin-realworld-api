@@ -2,50 +2,21 @@ package service
 
 import (
 	"context"
-	"crypto/sha256"
 	"errors"
-	"fmt"
 	"testing"
 
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/services"
 	"go-gin-realworld-api/test/mocks"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
-
-// Helper function to hash password (same as in auth_service.go)
-func hashPassword(password string) string {
-	hash := sha256.Sum256([]byte(password))
-	return fmt.Sprintf("%x", hash)
-}
-
-// Helper function to create a mock DB
-func createMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("failed to create sqlmock: %v", err)
-	}
-
-	gormDB, err := gorm.Open(mysql.New(mysql.Config{
-		Conn:                      db,
-		SkipInitializeWithVersion: true,
-	}), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("failed to open gorm db: %v", err)
-	}
-
-	return gormDB, mock
-}
 
 // Helper function to setup test dependencies
 func setupAuthServiceTest(t *testing.T) (context.Context, *services.AuthService, *mocks.MockUserRepository) {
 	mockUserRepo := new(mocks.MockUserRepository)
-	mockDB, _ := createMockDB(t)
+	mockDB, _ := CreateMockDB(t)
 	authService := services.NewAuthService(mockDB, mockUserRepo)
 	ctxForTest := context.Background()
 
@@ -57,7 +28,7 @@ func TestAuthService_Login_Success(t *testing.T) {
 	ctxForTest, authService, mockUserRepo := setupAuthServiceTest(t)
 	email := "test@example.com"
 	password := "password123"
-	hashedPassword := hashPassword(password)
+	hashedPassword := HashPassword(password)
 
 	expectedUser := &models.User{
 		ID:       1,
@@ -113,7 +84,7 @@ func TestAuthService_Login_InvalidPassword(t *testing.T) {
 	email := "test@example.com"
 	correctPassword := "password123"
 	wrongPassword := "wrongpassword"
-	hashedPassword := hashPassword(correctPassword)
+	hashedPassword := HashPassword(correctPassword)
 
 	existingUser := &models.User{
 		ID:       1,
