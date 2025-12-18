@@ -69,7 +69,8 @@ func (s *UserService) UpdateUser(c context.Context, userID int64, req *dtos.Upda
 
 	err := s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 		// Get user
-		user, err := s.userRepo.FindUserByID(tx, userID)
+		var err error
+		user, err = s.userRepo.FindUserByID(tx, userID)
 		if err != nil {
 			return err
 		}
