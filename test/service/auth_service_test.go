@@ -9,7 +9,7 @@ import (
 
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/services"
-	"go-gin-realworld-api/test/service/mocks"
+	"go-gin-realworld-api/test/mocks"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
