@@ -15,10 +15,10 @@ import (
 
 type AuthService struct {
 	db       *gorm.DB
-	userRepo *repository.UserRepository
+	userRepo repository.UserRepository
 }
 
-func NewAuthService(db *gorm.DB, userRepo *repository.UserRepository) *AuthService {
+func NewAuthService(db *gorm.DB, userRepo repository.UserRepository) *AuthService {
 	return &AuthService{db: db, userRepo: userRepo}
 }
 

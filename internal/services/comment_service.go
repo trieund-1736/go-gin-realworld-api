@@ -15,11 +15,11 @@ var ErrForbidden = errors.New("forbidden")
 
 type CommentService struct {
 	db          *gorm.DB
-	commentRepo *repository.CommentRepository
-	articleRepo *repository.ArticleRepository
+	commentRepo repository.CommentRepository
+	articleRepo repository.ArticleRepository
 }
 
-func NewCommentService(db *gorm.DB, commentRepo *repository.CommentRepository, articleRepo *repository.ArticleRepository) *CommentService {
+func NewCommentService(db *gorm.DB, commentRepo repository.CommentRepository, articleRepo repository.ArticleRepository) *CommentService {
 	return &CommentService{
 		db:          db,
 		commentRepo: commentRepo,

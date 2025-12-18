@@ -12,11 +12,11 @@ import (
 
 type FavoriteService struct {
 	db           *gorm.DB
-	favoriteRepo *repository.FavoriteRepository
-	articleRepo  *repository.ArticleRepository
+	favoriteRepo repository.FavoriteRepository
+	articleRepo  repository.ArticleRepository
 }
 
-func NewFavoriteService(db *gorm.DB, favoriteRepo *repository.FavoriteRepository, articleRepo *repository.ArticleRepository) *FavoriteService {
+func NewFavoriteService(db *gorm.DB, favoriteRepo repository.FavoriteRepository, articleRepo repository.ArticleRepository) *FavoriteService {
 	return &FavoriteService{
 		db:           db,
 		favoriteRepo: favoriteRepo,

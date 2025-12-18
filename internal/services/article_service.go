@@ -14,10 +14,10 @@ import (
 
 type ArticleService struct {
 	db          *gorm.DB
-	articleRepo *repository.ArticleRepository
+	articleRepo repository.ArticleRepository
 }
 
-func NewArticleService(db *gorm.DB, articleRepo *repository.ArticleRepository) *ArticleService {
+func NewArticleService(db *gorm.DB, articleRepo repository.ArticleRepository) *ArticleService {
 	return &ArticleService{
 		db:          db,
 		articleRepo: articleRepo,

@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"go-gin-realworld-api/internal/config"
 	"go-gin-realworld-api/internal/handlers"
-	"go-gin-realworld-api/internal/repository"
+	"go-gin-realworld-api/internal/repository/mysql"
 	"go-gin-realworld-api/internal/services"
 )
 
@@ -20,13 +20,13 @@ type AppContainer struct {
 
 func NewAppContainer() *AppContainer {
 	// Initialize repositories
-	userRepo := repository.NewUserRepository()
-	profileRepo := repository.NewProfileRepository()
-	followRepo := repository.NewFollowRepository()
-	articleRepo := repository.NewArticleRepository()
-	commentRepo := repository.NewCommentRepository()
-	favoriteRepo := repository.NewFavoriteRepository()
-	tagRepo := repository.NewTagRepository()
+	userRepo := mysql.NewMySqlUserRepository()
+	profileRepo := mysql.NewMySqlProfileRepository()
+	followRepo := mysql.NewMySqlFollowRepository()
+	articleRepo := mysql.NewMySqlArticleRepository()
+	commentRepo := mysql.NewMySqlCommentRepository()
+	favoriteRepo := mysql.NewMySqlFavoriteRepository()
+	tagRepo := mysql.NewMySqlTagRepository()
 
 	// Initialize services
 	authService := services.NewAuthService(config.DB, userRepo)

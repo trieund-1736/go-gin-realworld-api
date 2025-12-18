@@ -11,12 +11,12 @@ import (
 
 type ProfileService struct {
 	db          *gorm.DB
-	userRepo    *repository.UserRepository
-	profileRepo *repository.ProfileRepository
-	followRepo  *repository.FollowRepository
+	userRepo    repository.UserRepository
+	profileRepo repository.ProfileRepository
+	followRepo  repository.FollowRepository
 }
 
-func NewProfileService(db *gorm.DB, userRepo *repository.UserRepository, profileRepo *repository.ProfileRepository, followRepo *repository.FollowRepository) *ProfileService {
+func NewProfileService(db *gorm.DB, userRepo repository.UserRepository, profileRepo repository.ProfileRepository, followRepo repository.FollowRepository) *ProfileService {
 	return &ProfileService{
 		db:          db,
 		userRepo:    userRepo,

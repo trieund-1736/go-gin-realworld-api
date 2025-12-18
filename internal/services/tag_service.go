@@ -9,10 +9,10 @@ import (
 
 type TagService struct {
 	db      *gorm.DB
-	tagRepo *repository.TagRepository
+	tagRepo repository.TagRepository
 }
 
-func NewTagService(db *gorm.DB, tagRepo *repository.TagRepository) *TagService {
+func NewTagService(db *gorm.DB, tagRepo repository.TagRepository) *TagService {
 	return &TagService{
 		db:      db,
 		tagRepo: tagRepo,
