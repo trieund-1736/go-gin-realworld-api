@@ -78,7 +78,27 @@ go test -v ./test/...
 
 ## Project Structure
 
-- `cmd/app/`: Application entry point.
-- `internal/`: Core business logic, handlers, models, and repositories.
-- `test/`: Unit and integration tests.
-- `docker-compose.yml`: Docker configuration for the app and database.
+The project follows a clean architecture pattern, separating concerns into distinct layers:
+
+```text
+.
+├── cmd/
+│   └── app/
+│       └── main.go          # Application entry point
+├── internal/
+│   ├── bootstrap/           # Dependency injection & container setup
+│   ├── config/              # Environment & Database configurations
+│   ├── dtos/                # Data Transfer Objects (Request/Response)
+│   ├── errors/              # Custom error types & handling logic
+│   ├── handlers/            # HTTP controllers (Gin handlers)
+│   ├── middleware/          # Gin middlewares (JWT Auth, etc.)
+│   ├── models/              # GORM database models
+│   ├── repository/          # Data access layer (Interfaces & MySQL)
+│   ├── routes/              # API route definitions
+│   ├── services/            # Business logic layer
+│   └── utils/               # Helper utilities (JWT, Slug, etc.)
+├── test/                    # Unit and integration tests
+├── docker-compose.yml       # Docker orchestration
+├── go.mod                   # Go module dependencies
+└── swagger.yaml             # OpenAPI 3.0 specification
+```
