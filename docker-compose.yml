@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  # MySQL Database Service
+  database:
+    image: mysql:8.0
+    container_name: realworld_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: realworld_api
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+    networks:
+      - realworld_network
+
+  # Application Service
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: realworld_app
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      DB_DRIVER: mysql
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_USER: app_user
+      DB_PASSWORD: app_password
+      DB_NAME: realworld_api
+      JWT_SECRET: your-secret-key-change-in-production
+    ports:
+      - "8080:8080"
+    networks:
+      - realworld_network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  realworld_network:
+    driver: bridge
