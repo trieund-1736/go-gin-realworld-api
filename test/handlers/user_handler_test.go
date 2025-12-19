@@ -97,24 +97,28 @@ func TestUserHandler_RegisterUser_Validation(t *testing.T) {
 		payload        string
 		expectedStatus int
 		expectedError  string
+		expectedDetail map[string]string
 	}{
 		{
 			name:           "Missing user object",
 			payload:        `{}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Username": "is required", "Email": "is required", "Password": "is required"},
 		},
 		{
 			name:           "Missing username",
 			payload:        `{"user": {"email": "test@example.com", "password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Username": "is required"},
 		},
 		{
 			name:           "Invalid email format",
 			payload:        `{"user": {"username": "testuser", "email": "invalid-email", "password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Email": "must be a valid email"},
 		},
 	}
 
@@ -125,8 +129,7 @@ func TestUserHandler_RegisterUser_Validation(t *testing.T) {
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
 
-			assert.Equal(t, tt.expectedStatus, w.Code)
-			assert.Contains(t, w.Body.String(), tt.expectedError)
+			AssertAPIError(t, w, tt.expectedStatus, tt.expectedError, tt.expectedDetail)
 		})
 	}
 }
@@ -178,8 +181,7 @@ func TestUserHandler_GetCurrentUser_Unauthorized(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Assertions
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "user not authenticated")
+	AssertAPIError(t, w, http.StatusUnauthorized, "user not authenticated")
 }
 
 func TestUserHandler_GetCurrentUser_NotFound(t *testing.T) {
@@ -200,8 +202,7 @@ func TestUserHandler_GetCurrentUser_NotFound(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Assertions
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.Contains(t, w.Body.String(), "user not found")
+	AssertAPIError(t, w, http.StatusNotFound, "user not found")
 
 	m.userRepo.AssertExpectations(t)
 }
@@ -272,6 +273,5 @@ func TestUserHandler_UpdateUser_Validation(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "Invalid request body format")
+	AssertAPIError(t, w, http.StatusBadRequest, "Invalid request body format")
 }

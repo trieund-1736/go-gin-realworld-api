@@ -66,8 +66,7 @@ func TestTagHandler_GetTags_Error(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
-	assert.Contains(t, w.Body.String(), "failed to retrieve tags")
+	AssertAPIError(t, w, http.StatusInternalServerError, "failed to retrieve tags")
 
 	m.tagRepo.AssertExpectations(t)
 }

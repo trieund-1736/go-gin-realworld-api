@@ -293,8 +293,7 @@ func TestArticleHandler_GetArticle_NotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.Contains(t, w.Body.String(), "article not found")
+	AssertAPIError(t, w, http.StatusNotFound, "article not found")
 }
 
 func TestArticleHandler_CreateArticle_Unauthorized(t *testing.T) {
@@ -305,8 +304,7 @@ func TestArticleHandler_CreateArticle_Unauthorized(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "authentication required")
+	AssertAPIError(t, w, http.StatusUnauthorized, "authentication required")
 }
 
 func TestArticleHandler_UpdateArticle_NotFound(t *testing.T) {
@@ -332,8 +330,7 @@ func TestArticleHandler_UpdateArticle_NotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.Contains(t, w.Body.String(), "article not found")
+	AssertAPIError(t, w, http.StatusNotFound, "article not found")
 }
 
 func TestArticleHandler_DeleteArticle_NotFound(t *testing.T) {
@@ -354,6 +351,5 @@ func TestArticleHandler_DeleteArticle_NotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.Contains(t, w.Body.String(), "article not found")
+	AssertAPIError(t, w, http.StatusNotFound, "article not found")
 }

@@ -102,8 +102,7 @@ func TestFavoriteHandler_FavoriteArticle_Unauthorized(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "missing authorization")
+	AssertAPIError(t, w, http.StatusUnauthorized, "missing authorization")
 }
 
 func TestFavoriteHandler_FavoriteArticle_NotFound(t *testing.T) {
@@ -124,8 +123,7 @@ func TestFavoriteHandler_FavoriteArticle_NotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.Contains(t, w.Body.String(), "article not found")
+	AssertAPIError(t, w, http.StatusNotFound, "article not found")
 }
 
 func TestFavoriteHandler_UnfavoriteArticle_Success(t *testing.T) {
@@ -199,6 +197,5 @@ func TestFavoriteHandler_UnfavoriteArticle_NotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.Contains(t, w.Body.String(), "article not found")
+	AssertAPIError(t, w, http.StatusNotFound, "article not found")
 }

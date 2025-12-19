@@ -88,8 +88,7 @@ func TestProfileHandler_GetProfile_NotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.Contains(t, w.Body.String(), "profile not found")
+	AssertAPIError(t, w, http.StatusNotFound, "profile not found")
 }
 
 func TestProfileHandler_GetProfile_Authenticated_Following(t *testing.T) {

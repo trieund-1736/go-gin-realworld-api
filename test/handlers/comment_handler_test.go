@@ -101,8 +101,7 @@ func TestCommentHandler_CreateComment_Unauthorized(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "authentication required")
+	AssertAPIError(t, w, http.StatusUnauthorized, "authentication required")
 }
 
 func TestCommentHandler_GetComments_Success(t *testing.T) {
@@ -194,8 +193,7 @@ func TestCommentHandler_DeleteComment_Forbidden(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusForbidden, w.Code)
-	assert.Contains(t, w.Body.String(), "you can only delete your own comments")
+	AssertAPIError(t, w, http.StatusForbidden, "you can only delete your own comments")
 
 	m.commentRepo.AssertExpectations(t)
 }
@@ -218,8 +216,7 @@ func TestCommentHandler_DeleteComment_NotFound(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.Contains(t, w.Body.String(), "comment not found")
+	AssertAPIError(t, w, http.StatusNotFound, "comment not found")
 
 	m.commentRepo.AssertExpectations(t)
 }

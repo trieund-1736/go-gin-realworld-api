@@ -84,42 +84,49 @@ func TestAuthHandler_Login_Validation(t *testing.T) {
 		payload        string
 		expectedStatus int
 		expectedError  string
+		expectedDetail map[string]string
 	}{
 		{
 			name:           "Missing user object",
 			payload:        `{}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Email": "is required", "Password": "is required"},
 		},
 		{
 			name:           "Missing email",
 			payload:        `{"user": {"password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Email": "is required"},
 		},
 		{
 			name:           "Invalid email format",
 			payload:        `{"user": {"email": "invalid-email", "password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Email": "must be a valid email"},
 		},
 		{
 			name:           "Missing password",
 			payload:        `{"user": {"email": "test@example.com"}}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Password": "is required"},
 		},
 		{
 			name:           "Empty email",
 			payload:        `{"user": {"email": "", "password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Email": "is required"},
 		},
 		{
 			name:           "Empty password",
 			payload:        `{"user": {"email": "test@example.com", "password": ""}}`,
 			expectedStatus: http.StatusBadRequest,
 			expectedError:  "Validation failed",
+			expectedDetail: map[string]string{"Password": "is required"},
 		},
 	}
 
@@ -130,8 +137,7 @@ func TestAuthHandler_Login_Validation(t *testing.T) {
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
 
-			assert.Equal(t, tt.expectedStatus, w.Code)
-			assert.Contains(t, w.Body.String(), tt.expectedError)
+			AssertAPIError(t, w, tt.expectedStatus, tt.expectedError, tt.expectedDetail)
 		})
 	}
 }
@@ -160,8 +166,7 @@ func TestAuthHandler_Login_Unauthorized(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Assertions
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "Invalid email or password")
+	AssertAPIError(t, w, http.StatusUnauthorized, "Invalid email or password")
 
 	mockUserRepo.AssertExpectations(t)
 }
