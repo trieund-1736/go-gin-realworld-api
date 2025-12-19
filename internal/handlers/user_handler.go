@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"go-gin-realworld-api/internal/dtos"
+	customErr "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/services"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,15 +23,20 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	var req dtos.RegisterUserRequest
 
 	// Validate request body
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	if customErr.HandleBindError(c, c.ShouldBindJSON(&req)) {
 		return
 	}
 
 	// Register user
 	user, err := h.userService.RegisterUser(c.Request.Context(), req.User.Username, req.User.Email, req.User.Password)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to register user"})
+		log.Println("Error registering user:", err)
+		switch err {
+		case customErr.ErrUserAlreadyExists:
+			customErr.RespondError(c, http.StatusConflict, "User already exists")
+		default:
+			customErr.RespondError(c, http.StatusInternalServerError, "Failed to register user")
+		}
 		return
 	}
 
@@ -46,14 +53,14 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		customErr.RespondError(c, http.StatusUnauthorized, "user not authenticated")
 		return
 	}
 
 	// Get user from database
 	user, err := h.userService.GetUserByID(c.Request.Context(), userID.(int64))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		customErr.RespondError(c, http.StatusNotFound, "user not found")
 		return
 	}
 
@@ -70,22 +77,21 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		customErr.RespondError(c, http.StatusUnauthorized, "user not authenticated")
 		return
 	}
 
 	var req dtos.UpdateUserRequest
 
 	// Validate request body
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	if customErr.HandleBindError(c, c.ShouldBindJSON(&req)) {
 		return
 	}
 
 	// Update user
 	user, err := h.userService.UpdateUser(c.Request.Context(), userID.(int64), &req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to update user"})
+		customErr.RespondError(c, http.StatusInternalServerError, "failed to update user")
 		return
 	}
 

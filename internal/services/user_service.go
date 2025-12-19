@@ -3,10 +3,13 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"go-gin-realworld-api/internal/dtos"
+	customErr "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
 
+	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -42,6 +45,10 @@ func (s *UserService) RegisterUser(c context.Context, username, email, password 
 
 		// Create user in database
 		if err := s.userRepo.CreateUser(tx, user); err != nil {
+			// Check if error is duplicate entry
+			if isDuplicateUserError(err) {
+				return customErr.ErrUserAlreadyExists
+			}
 			return err
 		}
 
@@ -117,4 +124,14 @@ func (s *UserService) UpdateUser(c context.Context, userID int64, req *dtos.Upda
 	})
 
 	return user, err
+}
+
+// isDuplicateUserError checks if the error is a duplicate user error
+// by checking MySQL error code 1062
+func isDuplicateUserError(err error) bool {
+	var mysqlErr *mysql.MySQLError
+	if errors.As(err, &mysqlErr) {
+		return mysqlErr.Number == customErr.MySQLErrDuplicateEntry
+	}
+	return false
 }
