@@ -40,6 +40,32 @@ The project uses a standardized error response format:
 - **Business Logic Errors:** Defined as constants in `internal/errors/errors.go` for consistency across the application.
 - **HTTP Status Codes:** Correctly mapped to error types (e.g., 401 for invalid credentials, 404 for not found, 422/400 for validation).
 
+## Database Transactions
+
+The project ensures data integrity by using database transactions for operations involving multiple steps (e.g., user registration creating both a user and a profile):
+
+- **Service Layer Responsibility:** Transactions are initiated in the service layer using GORM's `Transaction` method.
+- **Repository Layer:** Repositories accept a `*gorm.DB` instance (which can be a transaction object) to perform operations within the same unit of work.
+- **Automatic Management:** Transactions are automatically committed upon successful completion or rolled back if any error occurs within the block.
+
+**Example (User Registration):**
+
+```go
+err := s.db.Transaction(func(tx *gorm.DB) error {
+    // 1. Create User
+    if err := s.userRepo.CreateUser(tx, user); err != nil {
+        return err // Transaction rolls back
+    }
+
+    // 2. Create associated Profile
+    if err := s.profileRepo.CreateProfile(tx, profile); err != nil {
+        return err // Transaction rolls back
+    }
+
+    return nil // Transaction commits
+})
+```
+
 ## Getting Started
 
 ### Running with Docker
@@ -93,11 +119,13 @@ The project follows a clean architecture pattern, separating concerns into disti
 │   ├── handlers/            # HTTP controllers (Gin handlers)
 │   ├── middleware/          # Gin middlewares (JWT Auth, etc.)
 │   ├── models/              # GORM database models
-│   ├── repository/          # Data access layer (Interfaces & MySQL)
+│   ├── repository/          # Data access layer (Interfaces)
+│   │   └── mysql/           # MySQL implementations
 │   ├── routes/              # API route definitions
 │   ├── services/            # Business logic layer
 │   └── utils/               # Helper utilities (JWT, Slug, etc.)
 ├── test/                    # Unit and integration tests
+│   └── mocks/               # Mock implementations for testing
 ├── docker-compose.yml       # Docker orchestration
 ├── go.mod                   # Go module dependencies
 └── swagger.yaml             # OpenAPI 3.0 specification
