@@ -13,8 +13,7 @@ var (
 	ErrUserAlreadyExists     = errors.New("user with this email or username already exists")
 	ErrInvalidCredentials    = errors.New("invalid credentials")
 	ErrFailedToGenerateToken = errors.New("failed to generate token")
-	ErrArticleNotFound       = errors.New("article not found")
-	ErrCommentNotFound       = errors.New("comment not found")
+	ErrNotFound              = errors.New("not found")
 	ErrForbidden             = errors.New("forbidden")
 )
 

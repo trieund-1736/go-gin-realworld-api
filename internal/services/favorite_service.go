@@ -60,7 +60,7 @@ func (s *FavoriteService) FavoriteArticle(ctx context.Context, slug string, user
 		return nil
 	}); err != nil {
 		if notFound {
-			return nil, appErrors.ErrArticleNotFound
+			return nil, appErrors.ErrNotFound
 		}
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (s *FavoriteService) UnfavoriteArticle(ctx context.Context, slug string, us
 		return nil
 	}); err != nil {
 		if notFound {
-			return nil, appErrors.ErrArticleNotFound
+			return nil, appErrors.ErrNotFound
 		}
 		return nil, err
 	}

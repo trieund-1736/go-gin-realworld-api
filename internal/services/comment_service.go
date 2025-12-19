@@ -33,6 +33,9 @@ func (s *CommentService) CreateComment(ctx context.Context, req *dtos.CreateComm
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		article, err := s.articleRepo.FindArticleBySlug(tx, slug)
 		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return appErrors.ErrNotFound
+			}
 			return err
 		}
 
@@ -70,6 +73,9 @@ func (s *CommentService) GetCommentsByArticleSlug(ctx context.Context, slug stri
 	// Get article by slug to get article ID
 	article, err := s.articleRepo.FindArticleBySlug(db, slug)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, appErrors.ErrNotFound
+		}
 		return nil, err
 	}
 
@@ -98,6 +104,9 @@ func (s *CommentService) DeleteComment(ctx context.Context, id int64, currentUse
 	return db.Transaction(func(tx *gorm.DB) error {
 		comment, err := s.commentRepo.GetCommentByID(tx, id)
 		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return appErrors.ErrNotFound
+			}
 			return err
 		}
 

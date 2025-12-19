@@ -38,7 +38,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	comment, err := h.commentService.CreateComment(c.Request.Context(), &req, slug, userID.(int64))
 	if err != nil {
 		switch err {
-		case appErrors.ErrArticleNotFound:
+		case appErrors.ErrNotFound:
 			appErrors.RespondError(c, http.StatusNotFound, "article not found")
 		default:
 			appErrors.RespondError(c, http.StatusInternalServerError, "failed to create comment")
@@ -56,7 +56,7 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 	comments, err := h.commentService.GetCommentsByArticleSlug(c.Request.Context(), slug)
 	if err != nil {
 		switch err {
-		case appErrors.ErrArticleNotFound:
+		case appErrors.ErrNotFound:
 			appErrors.RespondError(c, http.StatusNotFound, "article not found")
 		default:
 			appErrors.RespondError(c, http.StatusInternalServerError, "failed to get comments")
@@ -89,7 +89,7 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		switch err {
 		case appErrors.ErrForbidden:
 			appErrors.RespondError(c, http.StatusForbidden, "you can only delete your own comments")
-		case appErrors.ErrCommentNotFound:
+		case appErrors.ErrNotFound:
 			appErrors.RespondError(c, http.StatusNotFound, "comment not found")
 		default:
 			appErrors.RespondError(c, http.StatusInternalServerError, "failed to delete comment")
