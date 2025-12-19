@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/services"
 	"go-gin-realworld-api/test/mocks"
@@ -123,7 +124,7 @@ func TestFavoriteService_FavoriteArticle_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, resp)
-	assert.Equal(t, "article not found", err.Error())
+	assert.Equal(t, appErrors.ErrNotFound, err)
 	mockArticleRepo.AssertExpectations(t)
 }
 
@@ -184,6 +185,6 @@ func TestFavoriteService_UnfavoriteArticle_NotFound(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, resp)
-	assert.Equal(t, "article not found", err.Error())
+	assert.Equal(t, appErrors.ErrNotFound, err)
 	mockArticleRepo.AssertExpectations(t)
 }

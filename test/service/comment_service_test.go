@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"go-gin-realworld-api/internal/dtos"
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/services"
 	"go-gin-realworld-api/test/mocks"
@@ -177,7 +178,7 @@ func TestCommentService_DeleteComment_Forbidden(t *testing.T) {
 	err := commentService.DeleteComment(ctxForTest, commentID, currentUserID)
 
 	assert.Error(t, err)
-	assert.Equal(t, services.ErrForbidden, err)
+	assert.Equal(t, appErrors.ErrForbidden, err)
 	mockCommentRepo.AssertExpectations(t)
 }
 

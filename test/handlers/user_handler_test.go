@@ -102,19 +102,19 @@ func TestUserHandler_RegisterUser_Validation(t *testing.T) {
 			name:           "Missing user object",
 			payload:        `{}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 		{
 			name:           "Missing username",
 			payload:        `{"user": {"email": "test@example.com", "password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 		{
 			name:           "Invalid email format",
 			payload:        `{"user": {"username": "testuser", "email": "invalid-email", "password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 	}
 
@@ -273,5 +273,5 @@ func TestUserHandler_UpdateUser_Validation(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "invalid request body")
+	assert.Contains(t, w.Body.String(), "Invalid request body format")
 }

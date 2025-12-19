@@ -89,37 +89,37 @@ func TestAuthHandler_Login_Validation(t *testing.T) {
 			name:           "Missing user object",
 			payload:        `{}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 		{
 			name:           "Missing email",
 			payload:        `{"user": {"password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 		{
 			name:           "Invalid email format",
 			payload:        `{"user": {"email": "invalid-email", "password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 		{
 			name:           "Missing password",
 			payload:        `{"user": {"email": "test@example.com"}}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 		{
 			name:           "Empty email",
 			payload:        `{"user": {"email": "", "password": "password123"}}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 		{
 			name:           "Empty password",
 			payload:        `{"user": {"email": "test@example.com", "password": ""}}`,
 			expectedStatus: http.StatusBadRequest,
-			expectedError:  "invalid request body",
+			expectedError:  "Validation failed",
 		},
 	}
 
@@ -161,7 +161,7 @@ func TestAuthHandler_Login_Unauthorized(t *testing.T) {
 
 	// Assertions
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "invalid credentials")
+	assert.Contains(t, w.Body.String(), "Invalid email or password")
 
 	mockUserRepo.AssertExpectations(t)
 }
