@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/services"
 	"net/http"
 
@@ -25,7 +26,7 @@ func (h *FavoriteHandler) FavoriteArticle(c *gin.Context) {
 	// Get current user ID from context (set by JWT middleware)
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "missing authorization"})
+		appErrors.RespondError(c, http.StatusUnauthorized, "missing authorization")
 		return
 	}
 
@@ -35,10 +36,10 @@ func (h *FavoriteHandler) FavoriteArticle(c *gin.Context) {
 	result, err := h.favoriteService.FavoriteArticle(c.Request.Context(), slug, currentUserID)
 	if err != nil {
 		if err.Error() == "article not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
+			appErrors.RespondError(c, http.StatusNotFound, "article not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		appErrors.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -53,7 +54,7 @@ func (h *FavoriteHandler) UnfavoriteArticle(c *gin.Context) {
 	// Get current user ID from context (set by JWT middleware)
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "missing authorization"})
+		appErrors.RespondError(c, http.StatusUnauthorized, "missing authorization")
 		return
 	}
 
@@ -63,10 +64,10 @@ func (h *FavoriteHandler) UnfavoriteArticle(c *gin.Context) {
 	result, err := h.favoriteService.UnfavoriteArticle(c.Request.Context(), slug, currentUserID)
 	if err != nil {
 		if err.Error() == "article not found" {
-			c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
+			appErrors.RespondError(c, http.StatusNotFound, "article not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		appErrors.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

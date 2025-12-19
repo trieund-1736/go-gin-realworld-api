@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"go-gin-realworld-api/internal/dtos"
-	customErr "go-gin-realworld-api/internal/errors"
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/services"
 	"log"
 	"net/http"
@@ -23,7 +23,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	var req dtos.RegisterUserRequest
 
 	// Validate request body
-	if customErr.HandleBindError(c, c.ShouldBindJSON(&req)) {
+	if appErrors.HandleBindError(c, c.ShouldBindJSON(&req)) {
 		return
 	}
 
@@ -32,10 +32,10 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	if err != nil {
 		log.Println("Error registering user:", err)
 		switch err {
-		case customErr.ErrUserAlreadyExists:
-			customErr.RespondError(c, http.StatusConflict, "User already exists")
+		case appErrors.ErrUserAlreadyExists:
+			appErrors.RespondError(c, http.StatusConflict, "User already exists")
 		default:
-			customErr.RespondError(c, http.StatusInternalServerError, "Failed to register user")
+			appErrors.RespondError(c, http.StatusInternalServerError, "Failed to register user")
 		}
 		return
 	}
@@ -53,14 +53,14 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		customErr.RespondError(c, http.StatusUnauthorized, "user not authenticated")
+		appErrors.RespondError(c, http.StatusUnauthorized, "user not authenticated")
 		return
 	}
 
 	// Get user from database
 	user, err := h.userService.GetUserByID(c.Request.Context(), userID.(int64))
 	if err != nil {
-		customErr.RespondError(c, http.StatusNotFound, "user not found")
+		appErrors.RespondError(c, http.StatusNotFound, "user not found")
 		return
 	}
 
@@ -77,21 +77,21 @@ func (h *UserHandler) GetCurrentUser(c *gin.Context) {
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		customErr.RespondError(c, http.StatusUnauthorized, "user not authenticated")
+		appErrors.RespondError(c, http.StatusUnauthorized, "user not authenticated")
 		return
 	}
 
 	var req dtos.UpdateUserRequest
 
 	// Validate request body
-	if customErr.HandleBindError(c, c.ShouldBindJSON(&req)) {
+	if appErrors.HandleBindError(c, c.ShouldBindJSON(&req)) {
 		return
 	}
 
 	// Update user
 	user, err := h.userService.UpdateUser(c.Request.Context(), userID.(int64), &req)
 	if err != nil {
-		customErr.RespondError(c, http.StatusInternalServerError, "failed to update user")
+		appErrors.RespondError(c, http.StatusInternalServerError, "failed to update user")
 		return
 	}
 

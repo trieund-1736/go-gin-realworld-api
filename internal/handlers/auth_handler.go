@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"go-gin-realworld-api/internal/dtos"
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/services"
 	"net/http"
 
@@ -21,15 +22,14 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var req dtos.LoginRequest
 
 	// Validate request body
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	if appErrors.HandleBindError(c, c.ShouldBindJSON(&req)) {
 		return
 	}
 
 	// Login user
 	user, token, err := h.authService.Login(c.Request.Context(), req.User.Email, req.User.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		appErrors.RespondError(c, http.StatusUnauthorized, "Invalid email or password")
 		return
 	}
 

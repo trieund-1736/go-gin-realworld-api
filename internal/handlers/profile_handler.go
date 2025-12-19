@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/services"
 	"net/http"
 
@@ -30,7 +31,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 	// Get profile
 	profile, err := h.profileService.GetProfileByUsername(c.Request.Context(), username, currentUserID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "profile not found"})
+		appErrors.RespondError(c, http.StatusNotFound, "profile not found")
 		return
 	}
 
@@ -41,7 +42,7 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 func (h *ProfileHandler) FollowUser(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		appErrors.RespondError(c, http.StatusUnauthorized, "user not authenticated")
 		return
 	}
 
@@ -50,7 +51,7 @@ func (h *ProfileHandler) FollowUser(c *gin.Context) {
 	// Follow user
 	profile, err := h.profileService.FollowUser(c.Request.Context(), userID.(int64), username)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		appErrors.RespondError(c, http.StatusNotFound, "user not found")
 		return
 	}
 
@@ -61,7 +62,7 @@ func (h *ProfileHandler) FollowUser(c *gin.Context) {
 func (h *ProfileHandler) UnfollowUser(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		appErrors.RespondError(c, http.StatusUnauthorized, "user not authenticated")
 		return
 	}
 
@@ -70,7 +71,7 @@ func (h *ProfileHandler) UnfollowUser(c *gin.Context) {
 	// Unfollow user
 	profile, err := h.profileService.UnfollowUser(c.Request.Context(), userID.(int64), username)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		appErrors.RespondError(c, http.StatusNotFound, "user not found")
 		return
 	}
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"go-gin-realworld-api/internal/dtos"
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/services"
 	"net/http"
 	"strconv"
@@ -24,20 +25,19 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	// Get current user ID (required)
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+		appErrors.RespondError(c, http.StatusUnauthorized, "authentication required")
 		return
 	}
 
 	var req dtos.CreateCommentRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	if appErrors.HandleBindError(c, c.ShouldBindJSON(&req)) {
 		return
 	}
 
 	comment, err := h.commentService.CreateComment(c.Request.Context(), &req, slug, userID.(int64))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
+		appErrors.RespondError(c, http.StatusNotFound, "article not found")
 		return
 	}
 
@@ -50,7 +50,7 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 
 	comments, err := h.commentService.GetCommentsByArticleSlug(c.Request.Context(), slug)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
+		appErrors.RespondError(c, http.StatusNotFound, "article not found")
 		return
 	}
 
@@ -64,23 +64,23 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	// Get current user ID (required)
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+		appErrors.RespondError(c, http.StatusUnauthorized, "authentication required")
 		return
 	}
 
 	// Parse comment ID
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid comment id"})
+		appErrors.RespondError(c, http.StatusBadRequest, "invalid comment id")
 		return
 	}
 
 	if err := h.commentService.DeleteComment(c.Request.Context(), id, userID.(int64)); err != nil {
 		if err.Error() == "forbidden" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "you can only delete your own comments"})
+			appErrors.RespondError(c, http.StatusForbidden, "you can only delete your own comments")
 			return
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
+		appErrors.RespondError(c, http.StatusNotFound, "comment not found")
 		return
 	}
 

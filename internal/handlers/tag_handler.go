@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/services"
 	"net/http"
 
@@ -21,8 +22,8 @@ func NewTagHandler(tagService *services.TagService) *TagHandler {
 func (h *TagHandler) GetTags(c *gin.Context) {
 	tags, err := h.tagService.GetAllTags(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve tags"})
+		appErrors.RespondError(c, http.StatusInternalServerError, "failed to retrieve tags")
 		return
 	}
-	c.JSON(200, gin.H{"tags": tags})
+	c.JSON(http.StatusOK, gin.H{"tags": tags})
 }
