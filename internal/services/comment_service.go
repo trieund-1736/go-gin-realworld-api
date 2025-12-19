@@ -2,16 +2,14 @@ package services
 
 import (
 	"context"
-	"errors"
 	"go-gin-realworld-api/internal/dtos"
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
 	"time"
 
 	"gorm.io/gorm"
 )
-
-var ErrForbidden = errors.New("forbidden")
 
 type CommentService struct {
 	db          *gorm.DB
@@ -105,7 +103,7 @@ func (s *CommentService) DeleteComment(ctx context.Context, id int64, currentUse
 
 		// Check if current user is comment author or article author
 		if comment.AuthorID != currentUserID && comment.Article.AuthorID != currentUserID {
-			return ErrForbidden
+			return appErrors.ErrForbidden
 		}
 
 		return s.commentRepo.DeleteComment(tx, id)

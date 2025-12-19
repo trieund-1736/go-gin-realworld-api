@@ -29,7 +29,14 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Login user
 	user, token, err := h.authService.Login(c.Request.Context(), req.User.Email, req.User.Password)
 	if err != nil {
-		appErrors.RespondError(c, http.StatusUnauthorized, "Invalid email or password")
+		switch err {
+		case appErrors.ErrInvalidCredentials:
+			appErrors.RespondError(c, http.StatusUnauthorized, "Invalid email or password")
+		case appErrors.ErrFailedToGenerateToken:
+			appErrors.RespondError(c, http.StatusInternalServerError, "Failed to generate token")
+		default:
+			appErrors.RespondError(c, http.StatusInternalServerError, "Login failed")
+		}
 		return
 	}
 

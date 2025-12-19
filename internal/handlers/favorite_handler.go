@@ -35,11 +35,12 @@ func (h *FavoriteHandler) FavoriteArticle(c *gin.Context) {
 	// Call service to favorite article
 	result, err := h.favoriteService.FavoriteArticle(c.Request.Context(), slug, currentUserID)
 	if err != nil {
-		if err.Error() == "article not found" {
+		switch err {
+		case appErrors.ErrArticleNotFound:
 			appErrors.RespondError(c, http.StatusNotFound, "article not found")
-			return
+		default:
+			appErrors.RespondError(c, http.StatusInternalServerError, "failed to favorite article")
 		}
-		appErrors.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -63,11 +64,12 @@ func (h *FavoriteHandler) UnfavoriteArticle(c *gin.Context) {
 	// Call service to unfavorite article
 	result, err := h.favoriteService.UnfavoriteArticle(c.Request.Context(), slug, currentUserID)
 	if err != nil {
-		if err.Error() == "article not found" {
+		switch err {
+		case appErrors.ErrArticleNotFound:
 			appErrors.RespondError(c, http.StatusNotFound, "article not found")
-			return
+		default:
+			appErrors.RespondError(c, http.StatusInternalServerError, "failed to unfavorite article")
 		}
-		appErrors.RespondError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

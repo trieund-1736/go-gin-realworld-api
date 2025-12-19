@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 	"crypto/sha256"
-	"errors"
 	"fmt"
 
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
 	"go-gin-realworld-api/internal/utils"
@@ -28,19 +28,19 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*model
 	// Find user by email
 	user, err := s.userRepo.FindUserByEmail(db, email)
 	if err != nil {
-		return nil, "", errors.New("invalid credentials")
+		return nil, "", appErrors.ErrInvalidCredentials
 	}
 
 	// Verify password
 	hashedPassword := hashPassword(password)
 	if user.Password != hashedPassword {
-		return nil, "", errors.New("invalid credentials")
+		return nil, "", appErrors.ErrInvalidCredentials
 	}
 
 	// Generate JWT token
 	token, err := utils.GenerateJWTToken(user.ID, user.Email)
 	if err != nil {
-		return nil, "", errors.New("failed to generate token")
+		return nil, "", appErrors.ErrFailedToGenerateToken
 	}
 
 	return user, token, nil

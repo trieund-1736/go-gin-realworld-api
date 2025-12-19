@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"errors"
 	"go-gin-realworld-api/internal/dtos"
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/models"
 	"go-gin-realworld-api/internal/repository"
 
@@ -32,7 +32,7 @@ func (s *FavoriteService) FavoriteArticle(ctx context.Context, slug string, user
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		article, err := s.articleRepo.FindArticleBySlug(tx, slug)
 		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
+			if err == gorm.ErrRecordNotFound {
 				notFound = true
 			}
 			return err
@@ -60,7 +60,7 @@ func (s *FavoriteService) FavoriteArticle(ctx context.Context, slug string, user
 		return nil
 	}); err != nil {
 		if notFound {
-			return nil, errors.New("article not found")
+			return nil, appErrors.ErrArticleNotFound
 		}
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (s *FavoriteService) UnfavoriteArticle(ctx context.Context, slug string, us
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		article, err := s.articleRepo.FindArticleBySlug(tx, slug)
 		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
+			if err == gorm.ErrRecordNotFound {
 				notFound = true
 			}
 			return err
@@ -120,7 +120,7 @@ func (s *FavoriteService) UnfavoriteArticle(ctx context.Context, slug string, us
 		return nil
 	}); err != nil {
 		if notFound {
-			return nil, errors.New("article not found")
+			return nil, appErrors.ErrArticleNotFound
 		}
 		return nil, err
 	}
