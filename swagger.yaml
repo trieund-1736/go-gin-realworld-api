@@ -772,6 +772,13 @@ paths:
                     body:
                       type: string
                       example: Updated article body content...
+                    tagList:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                        - golang
+                        - updated
       security:
         - BearerAuth: []
       responses:
@@ -1191,47 +1198,65 @@ paths:
                       - web-development
 
 components:
+  schemas:
+    APIError:
+      type: object
+      description: Standard error response without details
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    ValidationError:
+      type: object
+      description: Error response with field-specific validation details
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        details:
+          type: object
   responses:
     BadRequest:
-      description: Invalid request body
+      description: Bad Request (Validation failed or invalid format)
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: invalid request body
+            $ref: "#/components/schemas/ValidationError"
+          example:
+            code: 400
+            message: "Validation failed"
+            details:
+              email: "must be a valid email"
+              password: "is required"
     Unauthorized:
       description: Unauthorized - missing or invalid token
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: missing authorization header
+            $ref: "#/components/schemas/APIError"
+          example:
+            code: 401
+            message: "missing authorization header"
     NotFound:
-      description: User not found
+      description: Resource not found
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: user not found
+            $ref: "#/components/schemas/APIError"
+          example:
+            code: 404
+            message: "Resource not found"
     InvalidCredentials:
       description: Invalid credentials
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: invalid credentials
+            $ref: "#/components/schemas/APIError"
+          example:
+            code: 401
+            message: "invalid credentials"
   securitySchemes:
     BearerAuth:
       type: http
