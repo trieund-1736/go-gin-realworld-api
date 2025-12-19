@@ -4,9 +4,6 @@ FROM golang:1.25.5-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache git
-
 # Copy go mod files
 COPY go.mod go.sum ./
 
@@ -17,13 +14,10 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main cmd/app/main.go
+RUN go build -a -o main cmd/app/main.go
 
 # Final stage
 FROM alpine:latest
-
-# Install ca-certificates for HTTPS and MySQL client tools
-RUN apk --no-cache add ca-certificates curl
 
 # Set working directory
 WORKDIR /root/
