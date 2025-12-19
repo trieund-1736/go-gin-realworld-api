@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"fmt"
+	appErrors "go-gin-realworld-api/internal/errors"
 	"go-gin-realworld-api/internal/utils"
 	"net/http"
 	"strings"
@@ -10,23 +10,23 @@ import (
 )
 
 // extractAndValidateToken extracts and validates JWT token from Authorization header
-// Returns (userID, email, error) with descriptive error message
+// Returns (userID, email, error) with error constants from errors package
 func extractAndValidateToken(c *gin.Context) (int64, string, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
-		return 0, "", fmt.Errorf("missing authorization header")
+		return 0, "", appErrors.ErrMissingAuthHeader
 	}
 
 	// Extract token from "Bearer <token>"
 	parts := strings.SplitN(authHeader, " ", 2)
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		return 0, "", fmt.Errorf("invalid authorization header format")
+		return 0, "", appErrors.ErrInvalidAuthHeader
 	}
 
 	tokenString := parts[1]
 	claims, err := utils.ParseJWTToken(tokenString)
 	if err != nil {
-		return 0, "", fmt.Errorf("invalid or expired token")
+		return 0, "", appErrors.ErrInvalidToken
 	}
 
 	return claims.UserID, claims.Email, nil
@@ -37,7 +37,12 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, email, err := extractAndValidateToken(c)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			switch err {
+			case appErrors.ErrMissingAuthHeader, appErrors.ErrInvalidAuthHeader, appErrors.ErrInvalidToken:
+				appErrors.RespondError(c, http.StatusUnauthorized, err.Error())
+			default:
+				appErrors.RespondError(c, http.StatusUnauthorized, "authentication failed")
+			}
 			c.Abort()
 			return
 		}

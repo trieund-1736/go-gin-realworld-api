@@ -10,11 +10,15 @@ import (
 
 // Errors definitions
 var (
-	ErrUserAlreadyExists     = errors.New("user with this email or username already exists")
-	ErrInvalidCredentials    = errors.New("invalid credentials")
-	ErrFailedToGenerateToken = errors.New("failed to generate token")
-	ErrNotFound              = errors.New("not found")
-	ErrForbidden             = errors.New("forbidden")
+	ErrUserAlreadyExists       = errors.New("user with this email or username already exists")
+	ErrInvalidCredentials      = errors.New("invalid credentials")
+	ErrFailedToGenerateToken   = errors.New("failed to generate token")
+	ErrNotFound                = errors.New("not found")
+	ErrForbidden               = errors.New("forbidden")
+	ErrMissingAuthHeader       = errors.New("missing authorization header")
+	ErrInvalidAuthHeader       = errors.New("invalid authorization header format")
+	ErrInvalidToken            = errors.New("invalid or expired token")
+	ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
 )
 
 // Error response

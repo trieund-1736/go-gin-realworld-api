@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"errors"
 	"go-gin-realworld-api/internal/config"
+	appErrors "go-gin-realworld-api/internal/errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -43,17 +43,17 @@ func ParseJWTToken(tokenString string) (*JWTClaims, error) {
 	claims := &JWTClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
+			return nil, appErrors.ErrUnexpectedSigningMethod
 		}
 		return []byte(cfg.JWT.Secret), nil
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, appErrors.ErrInvalidToken
 	}
 
 	if !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, appErrors.ErrInvalidToken
 	}
 
 	return claims, nil
